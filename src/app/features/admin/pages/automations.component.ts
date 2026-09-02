@@ -1,3 +1,72 @@
-import { Component } from '@angular/core';import { FormBuilder,Validators } from '@angular/forms';import { MockDataService } from '../../../core/services/mock-data.service';import { AutomationStoreService } from '../../../core/services/automation-store.service';import { Automation } from '../../../shared/models/product.models';
-@Component({selector:'app-automations',templateUrl: './automations.component.html',styleUrls: ['./automations.component.scss']})
-export class AutomationsComponent{get items(){return this.store.items()}formOpen=false;editingId='';form=this.fb.nonNullable.group({name:['',Validators.required],device:['BTV Sala',Validators.required],macro:['Abrir TV',Validators.required],frequency:['Diariamente',Validators.required],time:['08:00',Validators.required],timezone:['America/Sao_Paulo',Validators.required]});constructor(public data:MockDataService,private fb:FormBuilder,public store:AutomationStoreService){}create(){this.editingId='';this.form.reset({name:'',device:'BTV Sala',macro:'Abrir TV',frequency:'Diariamente',time:'08:00',timezone:'America/Sao_Paulo'});this.formOpen=true}edit(item:Automation){this.editingId=item.id;const [frequency,time='08:00']=item.trigger.split(' · ');this.form.setValue({name:item.name,device:item.device,macro:item.macro,frequency,time,timezone:'America/Sao_Paulo'});this.formOpen=true}save(){if(this.form.invalid)return;const v=this.form.getRawValue();this.store.save({id:this.editingId||crypto.randomUUID(),name:v.name,device:v.device,macro:v.macro,trigger:`${v.frequency} · ${v.time}`,nextRun:'Calculando…',enabled:true});this.formOpen=false}remove(item:Automation){if(confirm(`Excluir “${item.name}”?`))this.store.remove(item.id)}}
+import { Component } from '@angular/core';
+import { FormBuilder, Validators } from '@angular/forms';
+import { MockDataService } from '../../../core/services/mock-data.service';
+import { AutomationStoreService } from '../../../core/services/automation-store.service';
+import { Automation } from '../../../shared/models/product.models';
+@Component({
+  selector: 'app-automations',
+  templateUrl: './automations.component.html',
+  styleUrls: ['./automations.component.scss'],
+})
+export class AutomationsComponent {
+  get items() {
+    return this.store.items();
+  }
+  formOpen = false;
+  editingId = '';
+  form = this.fb.nonNullable.group({
+    name: ['', Validators.required],
+    device: ['BTV Sala', Validators.required],
+    macro: ['Abrir TV', Validators.required],
+    frequency: ['Diariamente', Validators.required],
+    time: ['08:00', Validators.required],
+    timezone: ['America/Sao_Paulo', Validators.required],
+  });
+  constructor(
+    public data: MockDataService,
+    private fb: FormBuilder,
+    public store: AutomationStoreService,
+  ) {}
+  create() {
+    this.editingId = '';
+    this.form.reset({
+      name: '',
+      device: 'BTV Sala',
+      macro: 'Abrir TV',
+      frequency: 'Diariamente',
+      time: '08:00',
+      timezone: 'America/Sao_Paulo',
+    });
+    this.formOpen = true;
+  }
+  edit(item: Automation) {
+    this.editingId = item.id;
+    const [frequency, time = '08:00'] = item.trigger.split(' · ');
+    this.form.setValue({
+      name: item.name,
+      device: item.device,
+      macro: item.macro,
+      frequency,
+      time,
+      timezone: 'America/Sao_Paulo',
+    });
+    this.formOpen = true;
+  }
+  save() {
+    if (this.form.invalid) return;
+    const v = this.form.getRawValue();
+    this.store.save({
+      id: this.editingId || crypto.randomUUID(),
+      name: v.name,
+      device: v.device,
+      macro: v.macro,
+      trigger: `${v.frequency} · ${v.time}`,
+      nextRun: 'Calculando…',
+      enabled: true,
+    });
+    this.formOpen = false;
+  }
+  remove(item: Automation) {
+    if (confirm(`Excluir “${item.name}”?`)) this.store.remove(item.id);
+  }
+}

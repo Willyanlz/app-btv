@@ -1,1 +1,16 @@
-.check{display:flex;gap:.75rem;padding:.8rem 0;border-bottom:1px solid var(--line);color:var(--ink)}.check i{color:var(--accent)}.check.pending{color:var(--muted)}.check.pending i{color:#52627a}
+.check {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+}
+.check i {
+  color: var(--accent);
+}
+.check.pending {
+  color: var(--muted);
+}
+.check.pending i {
+  color: #52627a;
+}

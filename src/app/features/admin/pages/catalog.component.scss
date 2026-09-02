@@ -1,1 +1,13 @@
-.modal-layer{position:fixed;inset:0;background:#02060dcc;z-index:60;display:grid;place-items:center;padding:1rem}.editor{width:min(560px,100%);padding:1.5rem}
+.modal-layer {
+  position: fixed;
+  inset: 0;
+  background: #02060dcc;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+.editor {
+  width: min(560px, 100%);
+  padding: 1.5rem;
+}

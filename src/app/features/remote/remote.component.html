@@ -1,1 +1,43 @@
-<div class="page"><div class="page-head"><div><p class="eyebrow">CONTROLE REMOTO</p><h1>Controle da BTV</h1><p class="lead-copy">Use os botões como em um controle físico.</p></div><span class="badge rounded-pill text-bg-danger px-3 py-2">Offline</span></div><div class="remote-layout"><section class="panel remote-panel"><app-remote-pad (pressed)="press($event)"></app-remote-pad><div class="media-row"><button (click)="press('VOLUME_DOWN')"><i class="bi bi-volume-down"></i></button><button (click)="press('MUTE')"><i class="bi bi-volume-mute"></i></button><button (click)="press('PLAY_PAUSE')"><i class="bi bi-play-fill"></i></button><button (click)="press('VOLUME_UP')"><i class="bi bi-volume-up"></i></button></div><form (ngSubmit)="sendText()" class="input-group mt-4"><input class="form-control" [(ngModel)]="text" name="text" placeholder="Digite um texto na TV"><button class="btn btn-accent">Enviar</button></form></section><section class="panel screen-panel"><div class="screen"><i class="bi bi-display"></i><span>A captura da TV aparecerá aqui</span></div><button class="btn btn-outline-info w-100 mt-3" (click)="capture()"><i class="bi bi-arrow-clockwise"></i> Atualizar imagem</button></section></div><p class="feedback" *ngIf="feedback">{{feedback}}</p></div>
+<div class="page">
+  <div class="page-head">
+    <div>
+      <p class="eyebrow">CONTROLE REMOTO</p>
+      <h1>Controle da BTV</h1>
+      <p class="lead-copy">Use os botões como em um controle físico.</p>
+    </div>
+    <span class="badge rounded-pill text-bg-danger px-3 py-2">Offline</span>
+  </div>
+  <div class="remote-layout">
+    <section class="panel remote-panel">
+      <app-remote-pad (pressed)="press($event)"></app-remote-pad>
+      <div class="media-row">
+        <button (click)="press('VOLUME_DOWN')">
+          <i class="bi bi-volume-down"></i></button
+        ><button (click)="press('MUTE')">
+          <i class="bi bi-volume-mute"></i></button
+        ><button (click)="press('PLAY_PAUSE')">
+          <i class="bi bi-play-fill"></i></button
+        ><button (click)="press('VOLUME_UP')">
+          <i class="bi bi-volume-up"></i>
+        </button>
+      </div>
+      <form (ngSubmit)="sendText()" class="input-group mt-4">
+        <input
+          class="form-control"
+          [(ngModel)]="text"
+          name="text"
+          placeholder="Digite um texto na TV"
+        /><button class="btn btn-accent">Enviar</button>
+      </form>
+    </section>
+    <section class="panel screen-panel">
+      <div class="screen">
+        <i class="bi bi-display"></i><span>A captura da TV aparecerá aqui</span>
+      </div>
+      <button class="btn btn-outline-info w-100 mt-3" (click)="capture()">
+        <i class="bi bi-arrow-clockwise"></i> Atualizar imagem
+      </button>
+    </section>
+  </div>
+  <p class="feedback" *ngIf="feedback">{{ feedback }}</p>
+</div>

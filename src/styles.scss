@@ -1,1 +1,131 @@
-@import "bootstrap/dist/css/bootstrap.min.css";@import "bootstrap-icons/font/bootstrap-icons.css";:root{--bg:#080e19;--panel:#121c2b;--panel-soft:#192538;--line:#26364d;--ink:#f1f5fb;--muted:#91a0b7;--accent:#66dfd0;--blue:#6594ff;--danger:#ff6b73;--warning:#f6be5b}*{box-sizing:border-box}html,body{min-height:100%}body{margin:0;background:radial-gradient(circle at 85% 0,#173752 0,transparent 32%),var(--bg);color:var(--ink);font-family:Inter,"Segoe UI",system-ui,sans-serif}.page{max-width:1240px;margin:auto;padding:clamp(1.25rem,4vw,3.5rem)}.page-head{display:flex;justify-content:space-between;gap:1rem;align-items:flex-end;margin-bottom:2rem}.eyebrow{font-size:.7rem;letter-spacing:.15em;color:var(--accent);font-weight:800}.page h1{font-size:clamp(1.8rem,4vw,2.7rem);letter-spacing:-.04em}.lead-copy{color:var(--muted);max-width:650px}.panel{background:linear-gradient(145deg,rgba(20,31,47,.96),rgba(14,23,37,.96));border:1px solid var(--line);border-radius:18px;box-shadow:0 20px 50px #0004}.btn-accent{background:var(--accent);color:#06121c;border:0;font-weight:750}.btn-accent:hover{background:#8ce9de;color:#06121c}.text-muted-custom{color:var(--muted)}.stat-icon{width:44px;height:44px;display:grid;place-items:center;border-radius:13px;background:#203048;color:var(--accent);font-size:1.15rem}.table{--bs-table-bg:transparent;--bs-table-color:var(--ink);--bs-table-border-color:var(--line)}.form-control,.form-select{background:#0b1422;border-color:var(--line);color:var(--ink)}.form-control:focus,.form-select:focus{background:#0b1422;color:var(--ink);border-color:var(--accent);box-shadow:0 0 0 .2rem #66dfd022}.form-control::placeholder{color:#66758d}.badge-soft{background:#233249;color:#b9c8dd}.empty-box{padding:3rem;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:14px}@media(max-width:767px){.page-head{align-items:flex-start;flex-direction:column}.page{padding:1.25rem}.table-responsive{font-size:.86rem}}
+@import "bootstrap/dist/css/bootstrap.min.css";
+@import "bootstrap-icons/font/bootstrap-icons.css";
+:root {
+  --bg: #080e19;
+  --panel: #121c2b;
+  --panel-soft: #192538;
+  --line: #26364d;
+  --ink: #f1f5fb;
+  --muted: #91a0b7;
+  --accent: #66dfd0;
+  --blue: #6594ff;
+  --danger: #ff6b73;
+  --warning: #f6be5b;
+}
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  min-height: 100%;
+}
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at 85% 0, #173752 0, transparent 32%), var(--bg);
+  color: var(--ink);
+  font-family: Inter, "Segoe UI", system-ui, sans-serif;
+}
+.page {
+  max-width: 1240px;
+  margin: auto;
+  padding: clamp(1.25rem, 4vw, 3.5rem);
+}
+.page-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-bottom: 2rem;
+}
+.eyebrow {
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  font-weight: 800;
+}
+.page h1 {
+  font-size: clamp(1.8rem, 4vw, 2.7rem);
+  letter-spacing: -0.04em;
+}
+.lead-copy {
+  color: var(--muted);
+  max-width: 650px;
+}
+.panel {
+  background: linear-gradient(
+    145deg,
+    rgba(20, 31, 47, 0.96),
+    rgba(14, 23, 37, 0.96)
+  );
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: 0 20px 50px #0004;
+}
+.btn-accent {
+  background: var(--accent);
+  color: #06121c;
+  border: 0;
+  font-weight: 750;
+}
+.btn-accent:hover {
+  background: #8ce9de;
+  color: #06121c;
+}
+.text-muted-custom {
+  color: var(--muted);
+}
+.stat-icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  background: #203048;
+  color: var(--accent);
+  font-size: 1.15rem;
+}
+.table {
+  --bs-table-bg: transparent;
+  --bs-table-color: var(--ink);
+  --bs-table-border-color: var(--line);
+}
+.form-control,
+.form-select {
+  background: #0b1422;
+  border-color: var(--line);
+  color: var(--ink);
+}
+.form-control:focus,
+.form-select:focus {
+  background: #0b1422;
+  color: var(--ink);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 0.2rem #66dfd022;
+}
+.form-control::placeholder {
+  color: #66758d;
+}
+.badge-soft {
+  background: #233249;
+  color: #b9c8dd;
+}
+.empty-box {
+  padding: 3rem;
+  text-align: center;
+  color: var(--muted);
+  border: 1px dashed var(--line);
+  border-radius: 14px;
+}
+@media (max-width: 767px) {
+  .page-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .page {
+    padding: 1.25rem;
+  }
+  .table-responsive {
+    font-size: 0.86rem;
+  }
+}

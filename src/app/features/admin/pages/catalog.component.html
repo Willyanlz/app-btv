@@ -1,1 +1,121 @@
-<div class="page"><div class="page-head"><div><p class="eyebrow">GERENCIAR</p><h1>{{title}}</h1><p class="lead-copy">{{subtitle}}</p></div><button class="btn btn-accent" (click)="openForm()"><i class="bi bi-plus-lg"></i> Novo</button></div><section class="panel p-3 p-md-4"><div class="d-flex gap-2 mb-3"><div class="input-group"><span class="input-group-text bg-transparent border-secondary text-muted-custom"><i class="bi bi-search"></i></span><input class="form-control" [(ngModel)]="filter" placeholder="Buscar em {{title.toLowerCase()}}"></div><button class="btn btn-outline-secondary"><i class="bi bi-funnel"></i></button></div><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Nome</th><th>Detalhes</th><th>Status</th><th class="text-end">Ações</th></tr></thead><tbody><tr *ngFor="let row of rows"><td><strong>{{row.name}}</strong><small class="d-block text-muted-custom">{{row.id}}</small></td><td>{{row.detail}}</td><td><span class="badge" [class.text-bg-success]="row.enabled" [class.badge-soft]="!row.enabled">{{row.enabled?'Ativo':'Inativo'}}</span></td><td class="text-end"><button class="btn btn-sm btn-outline-secondary me-1" (click)="edit(row)"><i class="bi bi-pencil"></i></button><button class="btn btn-sm btn-outline-danger" (click)="remove(row)"><i class="bi bi-trash"></i></button></td></tr></tbody></table></div></section><div class="modal-layer" *ngIf="editing"><form class="panel editor" (ngSubmit)="save()"><div class="d-flex justify-content-between"><div><p class="eyebrow">{{editing.id?'EDITAR':'CRIAR'}}</p><h2 class="h4">{{title}}</h2></div><button type="button" class="btn-close btn-close-white" (click)="editing=null"></button></div><label class="form-label mt-3">Nome</label><input class="form-control" name="name" [(ngModel)]="editing.name" required><label class="form-label mt-3">Identificador</label><input class="form-control" name="id" [(ngModel)]="editing.id" required><label class="form-label mt-3">Detalhes</label><textarea class="form-control" name="detail" [(ngModel)]="editing.detail"></textarea><div class="form-check form-switch mt-3"><input class="form-check-input" type="checkbox" name="enabled" [(ngModel)]="editing.enabled"><label class="form-check-label">Ativo</label></div><div class="d-flex justify-content-end gap-2 mt-4"><button type="button" class="btn btn-outline-secondary" (click)="editing=null">Cancelar</button><button class="btn btn-accent">Salvar</button></div></form></div></div>
+<div class="page">
+  <div class="page-head">
+    <div>
+      <p class="eyebrow">GERENCIAR</p>
+      <h1>{{ title }}</h1>
+      <p class="lead-copy">{{ subtitle }}</p>
+    </div>
+    <button class="btn btn-accent" (click)="openForm()">
+      <i class="bi bi-plus-lg"></i> Novo
+    </button>
+  </div>
+  <section class="panel p-3 p-md-4">
+    <div class="d-flex gap-2 mb-3">
+      <div class="input-group">
+        <span
+          class="input-group-text bg-transparent border-secondary text-muted-custom"
+          ><i class="bi bi-search"></i></span
+        ><input
+          class="form-control"
+          [(ngModel)]="filter"
+          placeholder="Buscar em {{ title.toLowerCase() }}"
+        />
+      </div>
+      <button class="btn btn-outline-secondary">
+        <i class="bi bi-funnel"></i>
+      </button>
+    </div>
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Detalhes</th>
+            <th>Status</th>
+            <th class="text-end">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of rows">
+            <td>
+              <strong>{{ row.name }}</strong
+              ><small class="d-block text-muted-custom">{{ row.id }}</small>
+            </td>
+            <td>{{ row.detail }}</td>
+            <td>
+              <span
+                class="badge"
+                [class.text-bg-success]="row.enabled"
+                [class.badge-soft]="!row.enabled"
+                >{{ row.enabled ? "Ativo" : "Inativo" }}</span
+              >
+            </td>
+            <td class="text-end">
+              <button
+                class="btn btn-sm btn-outline-secondary me-1"
+                (click)="edit(row)"
+              >
+                <i class="bi bi-pencil"></i></button
+              ><button
+                class="btn btn-sm btn-outline-danger"
+                (click)="remove(row)"
+              >
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <div class="modal-layer" *ngIf="editing">
+    <form class="panel editor" (ngSubmit)="save()">
+      <div class="d-flex justify-content-between">
+        <div>
+          <p class="eyebrow">{{ editing.id ? "EDITAR" : "CRIAR" }}</p>
+          <h2 class="h4">{{ title }}</h2>
+        </div>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          (click)="editing = null"
+        ></button>
+      </div>
+      <label class="form-label mt-3">Nome</label
+      ><input
+        class="form-control"
+        name="name"
+        [(ngModel)]="editing.name"
+        required
+      /><label class="form-label mt-3">Identificador</label
+      ><input
+        class="form-control"
+        name="id"
+        [(ngModel)]="editing.id"
+        required
+      /><label class="form-label mt-3">Detalhes</label
+      ><textarea
+        class="form-control"
+        name="detail"
+        [(ngModel)]="editing.detail"
+      ></textarea>
+      <div class="form-check form-switch mt-3">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          name="enabled"
+          [(ngModel)]="editing.enabled"
+        /><label class="form-check-label">Ativo</label>
+      </div>
+      <div class="d-flex justify-content-end gap-2 mt-4">
+        <button
+          type="button"
+          class="btn btn-outline-secondary"
+          (click)="editing = null"
+        >
+          Cancelar</button
+        ><button class="btn btn-accent">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>

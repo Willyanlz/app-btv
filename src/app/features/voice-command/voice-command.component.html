@@ -1,1 +1,35 @@
-<div class="page command-page"><div class="text-center"><p class="eyebrow">COMANDO INTELIGENTE</p><h1>O que você quer fazer?</h1><p class="lead-copy mx-auto">Escreva naturalmente. O sistema relacionará seu pedido a uma macro permitida.</p></div><section class="panel command-card"><form (ngSubmit)="resolve()"><div class="command-input"><i class="bi bi-stars"></i><input [formControl]="command" placeholder="Ex.: coloca Breaking Bad"><button class="btn btn-accent" [disabled]="command.invalid">Executar</button></div></form><div class="suggestions"><button *ngFor="let item of suggestions" (click)="command.setValue(item)">{{item}}</button></div><div class="result" *ngIf="state"><span class="pulse" [class.done]="state==='Concluído'"></span><div><small>STATUS</small><strong>{{state}}</strong><p *ngIf="intent">Intent: buscar_serie · query: {{intent}}</p></div></div></section></div>
+<div class="page command-page">
+  <div class="text-center">
+    <p class="eyebrow">COMANDO INTELIGENTE</p>
+    <h1>O que você quer fazer?</h1>
+    <p class="lead-copy mx-auto">
+      Escreva naturalmente. O sistema relacionará seu pedido a uma macro
+      permitida.
+    </p>
+  </div>
+  <section class="panel command-card">
+    <form (ngSubmit)="resolve()">
+      <div class="command-input">
+        <i class="bi bi-stars"></i
+        ><input
+          [formControl]="command"
+          placeholder="Ex.: coloca Breaking Bad"
+        /><button class="btn btn-accent" [disabled]="command.invalid">
+          Executar
+        </button>
+      </div>
+    </form>
+    <div class="suggestions">
+      <button *ngFor="let item of suggestions" (click)="command.setValue(item)">
+        {{ item }}
+      </button>
+    </div>
+    <div class="result" *ngIf="state">
+      <span class="pulse" [class.done]="state === 'Concluído'"></span>
+      <div>
+        <small>STATUS</small><strong>{{ state }}</strong>
+        <p *ngIf="intent">Intent: buscar_serie · query: {{ intent }}</p>
+      </div>
+    </div>
+  </section>
+</div>

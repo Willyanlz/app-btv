@@ -1,4 +1,85 @@
-import { Component,OnDestroy,OnInit } from '@angular/core';import { ActivatedRoute } from '@angular/router';import { Subscription } from 'rxjs';import { MockDataService } from '../../../core/services/mock-data.service';
-type Kind='devices'|'apps'|'macros'|'intents'|'dictionary';
-@Component({selector:'app-catalog',templateUrl: './catalog.component.html',styleUrls: ['./catalog.component.scss']})
-export class CatalogComponent implements OnInit,OnDestroy{kind:Kind='devices';title='';subtitle='';filter='';rows:any[]=[];editing:any=null;private sub?:Subscription;constructor(private route:ActivatedRoute,private data:MockDataService){}ngOnInit(){this.sub=this.route.data.subscribe(d=>{this.kind=d['kind'];this.title=d['title'];this.subtitle=d['subtitle'];this.load()})}ngOnDestroy(){this.sub?.unsubscribe()}load(){const map:any={devices:this.data.devices.map(x=>({id:x.id,name:x.name,detail:`${x.driverType} · ${x.host}:${x.port}`,enabled:x.enabled})),apps:this.data.apps.map(x=>({id:x.id,name:x.name,detail:`${x.packageName} · ${x.adapterType}`,enabled:x.enabled})),macros:this.data.macros.map(x=>({id:x.id,name:x.name,detail:`v${x.version} · ${x.status}`,enabled:x.enabled})),intents:this.data.intents.map(x=>({id:x.id,name:x.name,detail:`${x.macro} · ${x.phrases.length} frases`,enabled:x.enabled})),dictionary:this.data.dictionary.map(x=>({id:x.id,name:x.canonical,detail:`${x.category} · ${x.aliases.join(', ')}`,enabled:x.enabled}))};this.rows=map[this.kind]}openForm(){this.editing={id:'',name:'',detail:'',enabled:true}}edit(row:any){this.editing={...row}}save(){const index=this.rows.findIndex(x=>x.id===this.editing.id);if(index>=0)this.rows[index]={...this.editing};else this.rows=[...this.rows,{...this.editing}];this.editing=null}remove(row:any){if(confirm(`Excluir “${row.name}”?`))this.rows=this.rows.filter(x=>x!==row)}}
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { MockDataService } from '../../../core/services/mock-data.service';
+type Kind = 'devices' | 'apps' | 'macros' | 'intents' | 'dictionary';
+@Component({
+  selector: 'app-catalog',
+  templateUrl: './catalog.component.html',
+  styleUrls: ['./catalog.component.scss'],
+})
+export class CatalogComponent implements OnInit, OnDestroy {
+  kind: Kind = 'devices';
+  title = '';
+  subtitle = '';
+  filter = '';
+  rows: any[] = [];
+  editing: any = null;
+  private sub?: Subscription;
+  constructor(
+    private route: ActivatedRoute,
+    private data: MockDataService,
+  ) {}
+  ngOnInit() {
+    this.sub = this.route.data.subscribe((d) => {
+      this.kind = d['kind'];
+      this.title = d['title'];
+      this.subtitle = d['subtitle'];
+      this.load();
+    });
+  }
+  ngOnDestroy() {
+    this.sub?.unsubscribe();
+  }
+  load() {
+    const map: any = {
+      devices: this.data.devices.map((x) => ({
+        id: x.id,
+        name: x.name,
+        detail: `${x.driverType} · ${x.host}:${x.port}`,
+        enabled: x.enabled,
+      })),
+      apps: this.data.apps.map((x) => ({
+        id: x.id,
+        name: x.name,
+        detail: `${x.packageName} · ${x.adapterType}`,
+        enabled: x.enabled,
+      })),
+      macros: this.data.macros.map((x) => ({
+        id: x.id,
+        name: x.name,
+        detail: `v${x.version} · ${x.status}`,
+        enabled: x.enabled,
+      })),
+      intents: this.data.intents.map((x) => ({
+        id: x.id,
+        name: x.name,
+        detail: `${x.macro} · ${x.phrases.length} frases`,
+        enabled: x.enabled,
+      })),
+      dictionary: this.data.dictionary.map((x) => ({
+        id: x.id,
+        name: x.canonical,
+        detail: `${x.category} · ${x.aliases.join(', ')}`,
+        enabled: x.enabled,
+      })),
+    };
+    this.rows = map[this.kind];
+  }
+  openForm() {
+    this.editing = { id: '', name: '', detail: '', enabled: true };
+  }
+  edit(row: any) {
+    this.editing = { ...row };
+  }
+  save() {
+    const index = this.rows.findIndex((x) => x.id === this.editing.id);
+    if (index >= 0) this.rows[index] = { ...this.editing };
+    else this.rows = [...this.rows, { ...this.editing }];
+    this.editing = null;
+  }
+  remove(row: any) {
+    if (confirm(`Excluir “${row.name}”?`))
+      this.rows = this.rows.filter((x) => x !== row);
+  }
+}
