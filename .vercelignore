@@ -1,0 +1,5 @@
+.angular
+coverage
+node_modules
+npm-debug.log
+src/**/*.spec.ts
