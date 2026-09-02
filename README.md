@@ -6,7 +6,7 @@ PWA única construída com Angular 16, TypeScript e Bootstrap 5. Controle da TV 
 
 Senha fixa: `270815`
 
-A senha é validada exclusivamente no frontend. A sessão é salva em `localStorage` na chave `universal_remote_session`. Isso é apenas uma conveniência da primeira versão e não constitui autenticação segura.
+A senha fixa é validada no frontend e confirmada pela API. A sessão e o token são salvos em `localStorage` e não expiram automaticamente; permanecem até o usuário clicar em **Sair** ou limpar os dados do navegador. Isso é uma conveniência da primeira versão e não constitui autenticação forte.
 
 ## Executar e compilar
 
