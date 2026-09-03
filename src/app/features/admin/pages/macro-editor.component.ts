@@ -76,6 +76,7 @@ export class MacroEditorComponent implements OnInit {
       isNew: false,
     };
     this.loadScreens(macro.appPackage);
+    this.loadButtons(macro.appPackage);
   }
   clone(macro: any) {
     this.editing = {
@@ -87,6 +88,7 @@ export class MacroEditorComponent implements OnInit {
       isNew: true,
     };
     this.loadScreens(macro.appPackage);
+    this.loadButtons(macro.appPackage);
   }
   add(action: any) {
     this.editing.steps.push(this.newStep(action));
@@ -119,7 +121,9 @@ export class MacroEditorComponent implements OnInit {
   }
   availableActions() {
     return this.actions.filter(
-      (action) => action.type !== 'screenCondition' || this.screens.length,
+      (action) =>
+        (action.type !== 'screenCondition' || this.screens.length) &&
+        (action.type !== 'clickButton' || this.buttons.length),
     );
   }
   screenLabel(screenId: string) {
@@ -178,23 +182,31 @@ export class MacroEditorComponent implements OnInit {
     });
   }
   private newStep(action: any) {
-    return action.type === 'screenCondition'
-      ? {
-          type: 'screenCondition',
-          screenId: this.screens[0]?.id ?? '',
-          operator: 'is',
-          whenTrue: [],
-          whenFalse: [],
-        }
-      : action.type === 'key'
-        ? { type: 'key', key: action.key }
-        : action.type === 'wait'
-          ? { type: 'wait', milliseconds: 800 }
-          : action.type === 'text'
-            ? { type: 'text', value: `{{${this.editing.inputVariable}}}` }
-            : action.type === 'callMacro'
-              ? { type: 'callMacro', macroId: '' }
-              : { type: 'openApp', packageName: '' };
+    if (action.type === 'screenCondition') {
+      return {
+        type: 'screenCondition',
+        screenId: this.screens[0]?.id ?? '',
+        operator: 'is',
+        whenTrue: [],
+        whenFalse: [],
+      };
+    }
+    if (action.type === 'key') return { type: 'key', key: action.key };
+    if (action.type === 'wait') return { type: 'wait', milliseconds: 800 };
+    if (action.type === 'text')
+      return { type: 'text', value: `{{${this.editing.inputVariable}}}` };
+    if (action.type === 'callMacro') return { type: 'callMacro', macroId: '' };
+    if (action.type === 'clickButton')
+      return { type: 'clickButton', buttonId: this.firstButtonId() };
+    if (action.type === 'clickFocused') return { type: 'clickFocused' };
+    if (action.type === 'openApp') return { type: 'openApp', packageName: '' };
+    return { type: 'openApp', packageName: '' };
+  }
+  private firstButtonId() {
+    for (const group of this.buttons) {
+      if (group.buttons.length) return group.buttons[0].id;
+    }
+    return '';
   }
   private cloneSteps(steps: any[]) {
     return steps.map((step) => ({
@@ -223,6 +235,12 @@ export class MacroEditorComponent implements OnInit {
     if (step.type === 'screenCondition') {
       const operator = step.operator === 'isNot' ? 'não estiver' : 'estiver';
       return `Se ${operator} em ${this.screenLabel(step.screenId) ?? 'uma tela'}`;
+    }
+    if (step.type === 'clickButton') {
+      return `Clique em ${this.buttonLabel(step.buttonId) ?? 'um botão'}`;
+    }
+    if (step.type === 'clickFocused') {
+      return 'Clicar no foco';
     }
     return (
       this.actions.find(
