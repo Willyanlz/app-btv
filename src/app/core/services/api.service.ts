@@ -3,12 +3,7 @@ import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 
 export type Resource =
-  | 'devices'
-  | 'apps'
-  | 'macros'
-  | 'intents'
-  | 'automations'
-  | 'commands';
+  'devices' | 'apps' | 'macros' | 'intents' | 'automations' | 'commands';
 
 export interface DeviceApp {
   packageName: string;
@@ -53,7 +48,11 @@ export class ApiService {
   preflightMacro(deviceId: string, macroId: string) {
     return this.http.get<{
       ready: boolean;
-      requiredApp: { packageName: string; name: string } | null;
+      requiredApp: {
+        packageName: string;
+        name: string;
+        delaySeconds: number;
+      } | null;
       foregroundPackage?: string | null;
     }>(`${this.base}/devices/${deviceId}/macros/${macroId}/preflight`);
   }

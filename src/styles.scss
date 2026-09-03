@@ -92,16 +92,44 @@ body {
 }
 .form-control,
 .form-select {
-  background: #0b1422;
+  color-scheme: dark;
+  background-color: #0b1422;
   border-color: var(--line);
   color: var(--ink);
 }
+.form-select option,
+.form-select optgroup {
+  color: var(--ink);
+  background-color: #0b1422;
+}
 .form-control:focus,
 .form-select:focus {
-  background: #0b1422;
+  background-color: #0b1422;
   color: var(--ink);
   border-color: var(--accent);
   box-shadow: 0 0 0 0.2rem #66dfd022;
+}
+.form-control:disabled,
+.form-control[readonly],
+.form-select:disabled {
+  color: #8c9bb0;
+  background-color: #111b2a;
+  border-color: var(--line);
+  opacity: 1;
+}
+.form-control:-webkit-autofill,
+.form-control:-webkit-autofill:hover,
+.form-control:-webkit-autofill:focus,
+.form-control:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--ink);
+  caret-color: var(--ink);
+  box-shadow: 0 0 0 1000px #0b1422 inset;
+  transition: background-color 9999s ease-out;
+}
+.input-group-text {
+  color: var(--muted);
+  background-color: #111b2a;
+  border-color: var(--line);
 }
 .form-control::placeholder {
   color: #66758d;

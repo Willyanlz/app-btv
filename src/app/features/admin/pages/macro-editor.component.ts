@@ -53,6 +53,7 @@ export class MacroEditorComponent implements OnInit {
       name: '',
       description: '',
       appPackage: '',
+      appOpenDelaySeconds: 10,
       steps: [],
       requiresInput: false,
       inputLabel: 'O que deseja buscar?',
@@ -64,6 +65,7 @@ export class MacroEditorComponent implements OnInit {
   edit(macro: any) {
     this.editing = {
       ...macro,
+      appOpenDelaySeconds: macro.appOpenDelaySeconds ?? 10,
       steps: macro.steps.map((step: any) => ({ ...step })),
       isNew: false,
     };
@@ -71,6 +73,7 @@ export class MacroEditorComponent implements OnInit {
   clone(macro: any) {
     this.editing = {
       ...macro,
+      appOpenDelaySeconds: macro.appOpenDelaySeconds ?? 10,
       id: `${macro.id}-copia`,
       name: `${macro.name} (cópia)`,
       steps: macro.steps.map((step: any) => ({ ...step })),

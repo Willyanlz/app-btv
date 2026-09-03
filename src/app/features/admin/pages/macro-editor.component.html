@@ -85,6 +85,25 @@
       <small class="text-muted-custom">
         Antes de executar, confirma se este aplicativo está aberto.
       </small>
+      <ng-container *ngIf="editing.appPackage">
+        <label class="form-label mt-3">Tempo para o aplicativo abrir</label>
+        <div class="input-group">
+          <input
+            class="form-control"
+            type="number"
+            name="appOpenDelaySeconds"
+            min="0"
+            max="60"
+            step="1"
+            [(ngModel)]="editing.appOpenDelaySeconds"
+            required
+          />
+          <span class="input-group-text">segundos</span>
+        </div>
+        <small class="text-muted-custom">
+          Depois de abrir o aplicativo, a macro espera esse tempo para começar.
+        </small>
+      </ng-container>
       <div class="form-check form-switch mt-3">
         <input
           class="form-check-input"
@@ -125,31 +144,42 @@
         </button>
       </div>
       <h3 class="h6 mt-4">Passos</h3>
-      <div
-        class="border rounded p-2 mb-2"
-        *ngFor="let step of editing.steps; let i = index"
-      >
-        <div class="d-flex align-items-center gap-2">
-          <strong class="me-auto">{{ i + 1 }}. {{ label(step) }}</strong
-          ><button
-            type="button"
-            class="btn btn-sm btn-outline-secondary"
-            (click)="move(i, -1)"
-          >
-            ↑</button
-          ><button
-            type="button"
-            class="btn btn-sm btn-outline-secondary"
-            (click)="move(i, 1)"
-          >
-            ↓</button
-          ><button
-            type="button"
-            class="btn btn-sm btn-outline-danger"
-            (click)="removeStep(i)"
-          >
-            ×
-          </button>
+      <div class="macro-step" *ngFor="let step of editing.steps; let i = index">
+        <div class="macro-step-heading">
+          <span class="macro-step-number">{{ i + 1 }}</span>
+          <strong class="macro-step-title">{{ label(step) }}</strong>
+          <div class="macro-step-controls">
+            <button
+              type="button"
+              class="macro-icon-button"
+              (click)="move(i, -1)"
+              [disabled]="i === 0 || testing"
+              title="Mover passo para cima"
+              aria-label="Mover passo para cima"
+            >
+              <i class="bi bi-arrow-up"></i>
+            </button>
+            <button
+              type="button"
+              class="macro-icon-button"
+              (click)="move(i, 1)"
+              [disabled]="i === editing.steps.length - 1 || testing"
+              title="Mover passo para baixo"
+              aria-label="Mover passo para baixo"
+            >
+              <i class="bi bi-arrow-down"></i>
+            </button>
+            <button
+              type="button"
+              class="macro-icon-button macro-icon-button-danger"
+              (click)="removeStep(i)"
+              [disabled]="testing"
+              title="Excluir passo"
+              aria-label="Excluir passo"
+            >
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
         </div>
         <input
           *ngIf="step.type === 'text'"
@@ -183,10 +213,10 @@
             {{ m.name }}
           </option>
         </select>
-        <div class="d-flex flex-wrap gap-1 mt-2">
+        <div class="macro-test-actions">
           <button
             type="button"
-            class="btn btn-sm btn-outline-light"
+            class="macro-test-button macro-test-button-primary"
             [disabled]="testing"
             (click)="test(i, i)"
             title="Executar apenas este passo"
@@ -194,20 +224,20 @@
             <i class="bi bi-play-fill me-1"></i>Testar</button
           ><button
             type="button"
-            class="btn btn-sm btn-outline-secondary"
+            class="macro-test-button"
             [disabled]="testing"
             (click)="test(0, i)"
             title="Executar do início até este passo"
           >
-            Até aqui</button
+            <i class="bi bi-skip-end me-1"></i>Até aqui</button
           ><button
             type="button"
-            class="btn btn-sm btn-outline-secondary"
+            class="macro-test-button"
             [disabled]="testing"
             (click)="test(i, editing.steps.length - 1)"
             title="Executar deste passo até o fim"
           >
-            Daqui
+            <i class="bi bi-play-circle me-1"></i>Daqui
           </button>
         </div>
       </div>
