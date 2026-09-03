@@ -2,6 +2,8 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import {
   ApiService,
   DeviceApp,
+  FocusedNode,
+  KnownButton,
   KnownScreen,
 } from '../../../core/services/api.service';
 import { Router } from '@angular/router';
@@ -27,6 +29,11 @@ export class DeviceAppsComponent implements OnInit, OnDestroy {
   screenActivity = '';
   editingScreenId = '';
   savingScreen = false;
+  selectedScreen: KnownScreen | null = null;
+  buttons: KnownButton[] = [];
+  buttonName = '';
+  buttonFocus: FocusedNode | null = null;
+  buttonDumpLoading = false;
   private refreshTimer?: ReturnType<typeof setTimeout>;
 
   constructor(
@@ -120,6 +127,7 @@ export class DeviceAppsComponent implements OnInit, OnDestroy {
   closeScreens() {
     this.screensApp = null;
     this.screens = [];
+    this.selectedScreen = null;
     this.resetScreenForm();
   }
 
@@ -212,6 +220,89 @@ export class DeviceAppsComponent implements OnInit, OnDestroy {
     this.screenName = '';
     this.screenActivity = '';
     this.editingScreenId = '';
+  }
+  openScreenButtons(screen: KnownScreen) {
+    this.selectedScreen = screen;
+    this.loadButtons();
+  }
+
+  backFromButtons() {
+    this.selectedScreen = null;
+  }
+
+  loadButtons() {
+    if (!this.screensApp || !this.selectedScreen) return;
+    this.api
+      .appButtons(this.screensApp.packageName, this.selectedScreen.id)
+      .subscribe({
+        next: (buttons) => {
+          this.buttons = buttons;
+          this.buttonName = '';
+          this.buttonFocus = null;
+          this.buttonDumpLoading = false;
+        },
+        error: () => this.toasts.error('Não foi possível carregar os botões.'),
+      });
+  }
+
+  readFocus() {
+    if (!this.screensApp || !this.selectedScreen || this.buttonDumpLoading)
+      return;
+    this.buttonDumpLoading = true;
+    this.api
+      .screenFocus(this.deviceId, this.screensApp.packageName, this.selectedScreen.id)
+      .subscribe({
+        next: ({ node }) => {
+          this.buttonDumpLoading = false;
+          this.buttonFocus = node;
+          if (!node) this.toasts.error('Nenhum elemento focado encontrado.');
+        },
+        error: (error) => {
+          this.buttonDumpLoading = false;
+          this.toasts.error(
+            error.error?.message ?? 'Não foi possível ler o foco atual.',
+          );
+        },
+      });
+  }
+
+  saveFocusedButton() {
+    if (!this.screensApp || !this.selectedScreen || !this.buttonName.trim() || this.savingScreen)
+      return;
+    this.savingScreen = true;
+    this.api
+      .captureFocusedButton(
+        this.deviceId,
+        this.screensApp.packageName,
+        this.selectedScreen.id,
+        this.buttonName.trim(),
+      )
+      .subscribe({
+        next: () => {
+          this.savingScreen = false;
+          this.buttonName = '';
+          this.loadButtons();
+          this.toasts.success('Botão capturado.');
+        },
+        error: (error) => {
+          this.savingScreen = false;
+          this.toasts.error(
+            error.error?.message ?? 'Não foi possível capturar o botão.',
+          );
+        },
+      });
+  }
+
+  deleteButton(button: { id: string; name: string }) {
+    if (!confirm(`Excluir o botão "${button.name}"?`)) return;
+    this.api.deleteAppButton(button.id).subscribe({
+      next: () => {
+        this.loadButtons();
+        this.toasts.success('Botão excluído.');
+      },
+      error: (error) =>
+        this.toasts.error(error.error?.message ?? 'Não foi possível excluir.'),
+    });
   }
 
   askUninstall(app: { packageName: string; name: string }) {

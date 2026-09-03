@@ -421,4 +421,19 @@
       {{ macro.name }}
     </option>
   </select>
+  <select
+    *ngIf="step.type === 'clickButton'"
+    class="form-select mt-2"
+    [name]="'button-' + fieldName"
+    [(ngModel)]="step.buttonId"
+  >
+    <option value="">Selecione o botão</option>
+    <ng-container *ngFor="let group of buttons">
+      <optgroup *ngIf="group.buttons.length" label="{{ group.screenName }}">
+        <option *ngFor="let button of group.buttons" [value]="button.id">
+          {{ button.name }}
+        </option>
+      </optgroup>
+    </ng-container>
+  </select>
 </ng-template>

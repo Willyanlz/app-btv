@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { fromEvent, interval, Subject, timer } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
-import { ApiService, CurrentScreen } from '../../core/services/api.service';
+import { ApiService, CurrentScreen, FocusedNode } from '../../core/services/api.service';
 import { DeviceService } from '../../core/services/device.service';
 import { ToastService } from '../../core/services/toast.service';
 import { SelectedDeviceService } from '../../core/services/selected-device.service';
@@ -26,6 +26,9 @@ export class RemoteComponent implements OnInit, OnDestroy {
   identifyingScreen = false;
   showScreenInfo = false;
   newScreenName = '';
+  focusNode: FocusedNode | null = null;
+  focusLoading = false;
+  newButtonName = '';
   private lastAction = '';
   private lastActionAt = 0;
 
@@ -84,6 +87,8 @@ export class RemoteComponent implements OnInit, OnDestroy {
     this.screenState = 'idle';
     this.currentScreen = null;
     this.showScreenInfo = false;
+    this.focusNode = null;
+    this.newButtonName = '';
     this.test();
     if (this.screenshotEnabled) this.refreshScreen();
   }
@@ -162,6 +167,8 @@ export class RemoteComponent implements OnInit, OnDestroy {
     this.api.currentScreen(this.deviceId).subscribe({
       next: (screen) => {
         this.currentScreen = screen;
+        this.focusNode = null;
+        this.newButtonName = '';
         this.identifyingScreen = false;
       },
       error: (error) => {
@@ -199,6 +206,70 @@ export class RemoteComponent implements OnInit, OnDestroy {
           this.identifyingScreen = false;
           this.toasts.error(
             error.error?.message ?? 'Não foi possível salvar a tela.',
+          );
+        },
+      });
+  }
+
+  identifyFocus() {
+    if (
+      !this.deviceId ||
+      this.focusLoading ||
+      !this.currentScreen?.screen ||
+      !this.currentScreen.packageName
+    ) {
+      return;
+    }
+    this.focusLoading = true;
+    this.api
+      .screenFocus(
+        this.deviceId,
+        this.currentScreen.packageName,
+        this.currentScreen.screen.id,
+      )
+      .subscribe({
+        next: ({ node }) => {
+          this.focusLoading = false;
+          this.focusNode = node;
+          if (!node) this.toasts.error('Nenhum elemento focado encontrado.');
+        },
+        error: (error) => {
+          this.focusLoading = false;
+          this.toasts.error(
+            error.error?.message ?? 'Não foi possível ler o foco.',
+          );
+        },
+      });
+  }
+
+  saveFocusedButton() {
+    if (
+      !this.deviceId ||
+      !this.currentScreen?.screen ||
+      !this.currentScreen.packageName ||
+      !this.newButtonName.trim() ||
+      !this.focusNode
+    ) {
+      return;
+    }
+    this.focusLoading = true;
+    this.api
+      .captureFocusedButton(
+        this.deviceId,
+        this.currentScreen.packageName,
+        this.currentScreen.screen.id,
+        this.newButtonName.trim(),
+      )
+      .subscribe({
+        next: () => {
+          this.focusLoading = false;
+          this.newButtonName = '';
+          this.toasts.success('Botão salvo na tela.');
+        },
+        error: (error) => {
+          this.focusLoading = false;
+          this.toasts.error(
+            error.error?.message ?? 'Não foi possível salvar o botão.',
           );
         },
       });

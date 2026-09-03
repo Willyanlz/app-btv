@@ -19,6 +19,30 @@ export interface KnownScreen {
   name: string;
   activityName: string;
 }
+export interface KnownButton {
+  id: string;
+  screenId: string;
+  name: string;
+  resourceId: string;
+  text: string;
+  contentDesc: string;
+  className: string;
+  centerX: number;
+  centerY: number;
+  bounds: string;
+}
+export interface FocusedNode {
+  resourceId: string;
+  text: string;
+  contentDesc: string;
+  className: string;
+  package: string;
+  bounds: string;
+  clickable: boolean;
+  focused: boolean;
+  centerX: number;
+  centerY: number;
+}
 export interface CurrentScreen {
   packageName: string | null;
   appName: string | null;
@@ -81,6 +105,43 @@ export class ApiService {
   currentScreen(deviceId: string) {
     return this.http.get<CurrentScreen>(
       `${this.base}/devices/${deviceId}/current-screen`,
+    );
+  }
+  appButtons(packageName: string, screenId: string) {
+    return this.http.get<KnownButton[]>(
+      `${this.base}/apps/${packageName}/screens/${screenId}/buttons`,
+    );
+  }
+  createAppButton(
+    packageName: string,
+    screenId: string,
+    value: Partial<KnownButton>,
+  ) {
+    return this.http.post<KnownButton>(
+      `${this.base}/apps/${packageName}/screens/${screenId}/buttons`,
+      value,
+    );
+  }
+  updateAppButton(id: string, value: Partial<KnownButton>) {
+    return this.http.put<KnownButton>(`${this.base}/app-buttons/${id}`, value);
+  }
+  deleteAppButton(id: string) {
+    return this.http.delete(`${this.base}/app-buttons/${id}`);
+  }
+  screenFocus(deviceId: string, packageName: string, screenId: string) {
+    return this.http.get<{ node: FocusedNode | null }>(
+      `${this.base}/devices/${deviceId}/apps/${packageName}/screens/${screenId}/focus`,
+    );
+  }
+  captureFocusedButton(
+    deviceId: string,
+    packageName: string,
+    screenId: string,
+    name: string,
+  ) {
+    return this.http.post<KnownButton>(
+      `${this.base}/devices/${deviceId}/apps/${packageName}/screens/${screenId}/focus/capture`,
+      { name },
     );
   }
   runMacro(

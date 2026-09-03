@@ -109,6 +109,22 @@
 .current-screen-card:has(.current-screen-save) {
   flex-wrap: wrap;
 }
+.focus-node {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.5rem 0.6rem;
+  background: #0b1523;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin-top: 0.5rem;
+}
+.focus-node strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 @media (max-width: 576px) {
   .current-screen-save {

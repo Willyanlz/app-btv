@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { SelectedDeviceService } from '../../../core/services/selected-device.service';
+import { forkJoin, map } from 'rxjs';
 
 @Component({
   selector: 'app-macro-editor',
@@ -13,6 +14,7 @@ export class MacroEditorComponent implements OnInit {
   macros: any[] = [];
   actions: any[] = [];
   screens: { id: string; name: string }[] = [];
+  buttons: { screenId: string; screenName: string; buttons: any[] }[] = [];
   apps: { packageName: string; name: string }[] = [];
   editing: any = null;
   deviceId = '';
@@ -109,7 +111,11 @@ export class MacroEditorComponent implements OnInit {
     ];
   }
   atomicActions() {
-    return this.actions.filter((action) => action.type !== 'screenCondition');
+    return this.actions.filter(
+      (action) =>
+        action.type !== 'screenCondition' &&
+        (action.type !== 'clickButton' || this.buttons.length),
+    );
   }
   availableActions() {
     return this.actions.filter(
@@ -138,6 +144,7 @@ export class MacroEditorComponent implements OnInit {
       );
     }
     this.loadScreens(packageName);
+    this.loadButtons(packageName);
   }
   private loadScreens(packageName: string) {
     this.screens = [];
@@ -145,6 +152,30 @@ export class MacroEditorComponent implements OnInit {
     this.api
       .screens(packageName)
       .subscribe((screens) => (this.screens = screens));
+  }
+  buttonLabel(buttonId: string) {
+    for (const group of this.buttons) {
+      const button = group.buttons.find((item) => item.id === buttonId);
+      if (button) return button.name;
+    }
+    return null;
+  }
+  loadButtons(packageName: string) {
+    this.buttons = [];
+    if (!packageName) return;
+    this.api.screens(packageName).subscribe((screens) => {
+      if (!screens.length) return;
+      const requests = screens.map((screen) =>
+        this.api.appButtons(packageName, screen.id).pipe(
+          map((buttons) => ({
+            screenId: screen.id,
+            screenName: screen.name,
+            buttons,
+          })),
+        ),
+      );
+      forkJoin(requests).subscribe((groups) => (this.buttons = groups));
+    });
   }
   private newStep(action: any) {
     return action.type === 'screenCondition'

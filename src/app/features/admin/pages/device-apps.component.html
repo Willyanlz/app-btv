@@ -122,6 +122,7 @@
         </button>
       </div>
 
+      <ng-container *ngIf="!selectedScreen">
       <div class="known-screen-list mt-3">
         <p class="text-muted-custom small" *ngIf="!screens.length">
           Nenhuma tela cadastrada para este aplicativo.
@@ -133,6 +134,15 @@
               {{ screen.activityName }}
             </small>
           </div>
+          <button
+            class="macro-icon-button"
+            type="button"
+            (click)="openScreenButtons(screen)"
+            aria-label="Gerenciar botões da tela"
+            title="Botões da tela"
+          >
+            <i class="bi bi-grid"></i>
+          </button>
           <button
             class="macro-icon-button"
             type="button"
@@ -201,6 +211,82 @@
       >
         Cancelar edição
       </button>
+      </ng-container>
+
+      <!-- Botões conhecidos da tela -->
+      <ng-container *ngIf="selectedScreen">
+        <hr />
+        <div class="d-flex justify-content-between align-items-center">
+          <h3 class="h6 mb-0">Botões de “{{ selectedScreen.name }}”</h3>
+          <button
+            class="btn btn-sm btn-outline-secondary"
+            type="button"
+            (click)="backFromButtons()"
+          >
+            <i class="bi bi-arrow-left me-1"></i>Voltar às telas
+          </button>
+        </div>
+        <p class="text-muted-custom small mt-2" *ngIf="!buttons.length">
+          Nenhum botão cadastrado. Use “Ler foco” e “Capturar” abaixo.
+        </p>
+        <div
+          class="known-screen-row"
+          *ngFor="let button of buttons"
+        >
+          <div class="text-break">
+            <strong>{{ button.name }}</strong>
+            <small class="d-block text-muted-custom">
+              {{ button.text || button.contentDesc || button.resourceId || 'sem identificador' }}
+              &middot; ({{ button.centerX }},{{ button.centerY }})
+            </small>
+          </div>
+          <button
+            class="macro-icon-button macro-icon-button-danger"
+            type="button"
+            (click)="deleteButton(button)"
+            aria-label="Excluir botão"
+          >
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+        <hr />
+        <h4 class="h6">Capturar botão</h4>
+        <p class="text-muted-custom small">
+          Deixe o aparelho com o foco no botão desejado e clique em “Ler foco”.
+        </p>
+        <button
+          class="btn btn-outline-info"
+          type="button"
+          [disabled]="buttonDumpLoading"
+          (click)="readFocus()"
+        >
+          <i class="bi bi-crosshair me-1"></i>
+          {{ buttonDumpLoading ? 'Lendo foco...' : 'Ler foco' }}
+        </button>
+        <div class="alert alert-info small mt-2" *ngIf="buttonFocus">
+          <div>Focado: <strong>{{ buttonFocus.text || buttonFocus.contentDesc || buttonFocus.resourceId || '—' }}</strong></div>
+          <div class="text-muted-custom">
+            {{ buttonFocus.className }} &middot; ({{ buttonFocus.centerX }},{{
+              buttonFocus.centerY
+            }})
+          </div>
+        </div>
+        <label class="form-label mt-3">Nome amigável do botão</label>
+        <input
+          class="form-control"
+          name="buttonName"
+          [(ngModel)]="buttonName"
+          placeholder="Ex.: Buscar"
+        />
+        <button
+          class="btn btn-accent w-100 mt-3"
+          type="button"
+          [disabled]="!buttonName.trim() || !buttonFocus || savingScreen"
+          (click)="saveFocusedButton()"
+        >
+          <i class="bi bi-save me-1"></i>Capturar botão focado
+        </button>
+      </ng-container>
     </div>
   </div>
 </div>

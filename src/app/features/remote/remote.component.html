@@ -58,6 +58,51 @@
           Salvar esta tela
         </button>
       </form>
+      <div class="focus-card" *ngIf="currentScreen.screen">
+        <hr />
+        <div class="d-flex align-items-center gap-2">
+          <strong class="small">Foco atual</strong>
+          <button
+            class="btn btn-sm btn-outline-info ms-auto"
+            type="button"
+            (click)="identifyFocus()"
+            [disabled]="focusLoading"
+          >
+            <i class="bi bi-crosshair me-1"></i>
+            {{ focusLoading ? "Lendo..." : "Ler foco" }}
+          </button>
+        </div>
+        <div class="small text-muted-custom mt-2" *ngIf="!focusNode">
+          Navegue na TV até o botão desejado e clique em “Ler foco”.
+        </div>
+        <ng-container *ngIf="focusNode">
+          <div class="focus-node small">
+            <strong>{{
+              focusNode.text ||
+                focusNode.contentDesc ||
+                focusNode.resourceId ||
+                "Elemento sem texto"
+            }}</strong>
+            <span class="text-muted-custom">
+              ({{ focusNode.centerX }}, {{ focusNode.centerY }})
+            </span>
+          </div>
+          <input
+            class="form-control form-control-sm mt-2"
+            name="newButtonName"
+            [(ngModel)]="newButtonName"
+            placeholder="Nome do botão, ex.: Buscar"
+          />
+          <button
+            class="btn btn-sm btn-accent w-100 mt-2"
+            type="button"
+            (click)="saveFocusedButton()"
+            [disabled]="!newButtonName.trim() || focusLoading"
+          >
+            <i class="bi bi-save me-1"></i>Salvar como botão
+          </button>
+        </ng-container>
+      </div>
     </ng-container>
   </section>
   <div class="remote-layout">
