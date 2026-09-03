@@ -1,72 +1,20 @@
-import { Component } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
-import { MockDataService } from '../../../core/services/mock-data.service';
-import { AutomationStoreService } from '../../../core/services/automation-store.service';
-import { Automation } from '../../../shared/models/product.models';
-@Component({
-  selector: 'app-automations',
-  templateUrl: './automations.component.html',
-  styleUrls: ['./automations.component.scss'],
-})
-export class AutomationsComponent {
-  get items() {
-    return this.store.items();
-  }
-  formOpen = false;
-  editingId = '';
-  form = this.fb.nonNullable.group({
-    name: ['', Validators.required],
-    device: ['BTV Sala', Validators.required],
-    macro: ['Abrir TV', Validators.required],
-    frequency: ['Diariamente', Validators.required],
-    time: ['08:00', Validators.required],
-    timezone: ['America/Sao_Paulo', Validators.required],
-  });
-  constructor(
-    public data: MockDataService,
-    private fb: FormBuilder,
-    public store: AutomationStoreService,
-  ) {}
-  create() {
-    this.editingId = '';
-    this.form.reset({
-      name: '',
-      device: 'BTV Sala',
-      macro: 'Abrir TV',
-      frequency: 'Diariamente',
-      time: '08:00',
-      timezone: 'America/Sao_Paulo',
-    });
-    this.formOpen = true;
-  }
-  edit(item: Automation) {
-    this.editingId = item.id;
-    const [frequency, time = '08:00'] = item.trigger.split(' · ');
-    this.form.setValue({
-      name: item.name,
-      device: item.device,
-      macro: item.macro,
-      frequency,
-      time,
-      timezone: 'America/Sao_Paulo',
-    });
-    this.formOpen = true;
-  }
-  save() {
-    if (this.form.invalid) return;
-    const v = this.form.getRawValue();
-    this.store.save({
-      id: this.editingId || crypto.randomUUID(),
-      name: v.name,
-      device: v.device,
-      macro: v.macro,
-      trigger: `${v.frequency} · ${v.time}`,
-      nextRun: 'Calculando…',
-      enabled: true,
-    });
-    this.formOpen = false;
-  }
-  remove(item: Automation) {
-    if (confirm(`Excluir “${item.name}”?`)) this.store.remove(item.id);
-  }
+import { Component, OnInit } from '@angular/core';
+import { forkJoin } from 'rxjs';
+import { ApiService } from '../../../core/services/api.service';
+
+@Component({ selector: 'app-automations', templateUrl: './automations.component.html', styleUrls: ['./automations.component.scss'] })
+export class AutomationsComponent implements OnInit {
+  items: any[] = [];
+  devices: any[] = [];
+  macros: any[] = [];
+  editing: any = null;
+  constructor(private readonly api: ApiService) {}
+  ngOnInit() { this.load(); }
+  load() { forkJoin({ items: this.api.list<any>('automations'), devices: this.api.list<any>('devices'), macros: this.api.list<any>('macros') }).subscribe((data) => Object.assign(this, data)); }
+  create() { this.editing = { id: '', name: '', deviceId: '', macroId: '', schedule: 'Diariamente · 08:00', enabled: true, isNew: true }; }
+  edit(item: any) { this.editing = { ...item, isNew: false }; }
+  save() { const value = {...this.editing}; const isNew=value.isNew; delete value.isNew; (isNew?this.api.create('automations',value):this.api.update('automations',value)).subscribe(()=>{this.editing=null;this.load();}); }
+  remove(item: any) { if(confirm(`Excluir “${item.name}”?`)) this.api.remove('automations',item.id).subscribe(()=>this.load()); }
+  run(item: any) { this.api.runMacro(item.deviceId,item.macroId).subscribe(); }
+  name(rows:any[],id:string){return rows.find(x=>x.id===id)?.name??id;}
 }

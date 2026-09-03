@@ -26,14 +26,14 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let x of data.executions">
-            <td>{{ x.createdAt }}</td>
-            <td>{{ x.device }}</td>
-            <td>{{ x.macro }}</td>
+          <tr *ngFor="let x of executions">
+            <td>{{ x.created_at }}</td>
+            <td>{{ x.message }}</td>
+            <td>{{ x.action }}</td>
             <td>
               <span class="badge badge-soft">{{ x.status }}</span>
             </td>
-            <td>{{ x.duration }}</td>
+            <td>—</td>
           </tr>
         </tbody>
       </table>

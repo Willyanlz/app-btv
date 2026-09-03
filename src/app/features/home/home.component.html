@@ -7,27 +7,30 @@
         Controle a BTV, abra seus aplicativos ou simplesmente diga o que deseja.
       </p>
     </div>
-    <div class="device-pill">
-      <span></span>
-      <div><small>BTV Sala</small><strong>Offline</strong></div>
+    <a class="device-pill" routerLink="/admin/dispositivos"><span></span><div><small>Configuração</small><strong>Dispositivos</strong></div></a>
+  </section>
+  <section class="quick-commands">
+    <h2 class="section-title">Comandos rápidos</h2>
+    <div class="command-grid">
+      <button
+        class="command-chip"
+        *ngFor="let command of commands"
+        (click)="runCommand(command.id, command.label)"
+      >
+        <i class="bi bi-key"></i>
+        <span>{{ command.label }}</span>
+        <small>{{ command.aliases[0] }}</small>
+      </button>
     </div>
   </section>
-  <button class="command-box" routerLink="/comando">
-    <i class="bi bi-stars"></i
-    ><span
-      ><small>Comando inteligente</small
-      ><strong>“Coloca Breaking Bad”</strong></span
-    ><i class="bi bi-arrow-right"></i>
-  </button>
   <h2 class="section-title">Acesso rápido</h2>
   <div class="app-grid">
     <button
       class="app-card"
-      *ngFor="let app of data.apps"
+      *ngFor="let app of apps"
       (click)="open(app.name)"
     >
-      <span class="app-icon" [style.background]="app.color"
-        ><i class="bi" [ngClass]="app.icon"></i></span
+      <span class="app-icon neutral"><i class="bi bi-grid"></i></span
       ><strong>{{ app.name }}</strong
       ><small>{{ app.enabled ? "Disponível" : "Indisponível" }}</small></button
     ><button class="app-card" routerLink="/controle">
@@ -39,5 +42,9 @@
       ><strong>Macros</strong><small>Atalhos inteligentes</small>
     </button>
   </div>
-  <div *ngIf="message" class="toast-message">{{ message }}</div>
+  <div
+    *ngIf="message"
+    class="toast-message"
+    [class.has-error]="error"
+  >{{ message }}</div>
 </div>

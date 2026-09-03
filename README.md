@@ -4,9 +4,7 @@ PWA única construída com Angular 16, TypeScript e Bootstrap 5. Controle da TV 
 
 ## Acesso atual
 
-Senha fixa: `270815`
-
-A senha fixa é validada no frontend e confirmada pela API. A sessão e o token são salvos em `localStorage` e não expiram automaticamente; permanecem até o usuário clicar em **Sair** ou limpar os dados do navegador. Isso é uma conveniência da primeira versão e não constitui autenticação forte.
+A senha é validada pela API (`POST /api/v1/auth/login`) e retorna um JWT com validade de 12 horas. A sessão e o token são salvos em `localStorage` e expiram junto com o token; também podem ser encerrados ao clicar em **Sair**.
 
 ## Executar e compilar
 
@@ -41,7 +39,7 @@ Após publicar na Vercel, inclua a origem definitiva em `CORS_ORIGINS` no backen
 - `core/`: autenticação, guards, API, estado e stores.
 - `layout/`: shell único e menu sanduíche.
 - `shared/`: interfaces e modelos.
-- `features/home`, `remote` e `voice-command`: experiência principal.
+- `features/home`, `remote` e `admin`: experiência principal.
 - `features/admin`: dispositivos, aplicativos, macros, intents, dicionário, automações, execuções, filas, diagnóstico, screenshots e configurações.
 
 ## Implementado
@@ -49,7 +47,7 @@ Após publicar na Vercel, inclua a origem definitiva em `CORS_ORIGINS` no backen
 - Login local e sessão persistente.
 - PWA instalável, manifest e service worker.
 - Menu sanduíche responsivo.
-- Home, controle remoto e comando inteligente.
+- Home, controle remoto e comandos rápidos (dicionário ADB).
 - Dashboard e cadastros administrativos.
 - Criar, editar, pausar e excluir automações.
 - Persistência local das automações.

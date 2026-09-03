@@ -6,7 +6,7 @@
     ><span>Universal <strong>Remote</strong></span></a
   >
   <div class="spacer"></div>
-  <span class="connection"><i></i> BTV Sala</span
+  <a class="connection" routerLink="/admin/dispositivos"><i></i> Dispositivos</a
   ><button class="icon-button" (click)="logout()" aria-label="Sair">
     <i class="bi bi-box-arrow-right"></i>
   </button>
@@ -24,19 +24,17 @@
       ><i class="bi bi-house"></i> Início</a
     ><a routerLink="/controle" routerLinkActive="active"
       ><i class="bi bi-controller"></i> Controle remoto</a
-    ><a routerLink="/comando" routerLinkActive="active"
-      ><i class="bi bi-stars"></i> Comando inteligente</a
     ><span class="nav-label">GERENCIAR</span
     ><a routerLink="/admin/dispositivos" routerLinkActive="active"
       ><i class="bi bi-hdd-network"></i> Dispositivos</a
     ><a routerLink="/admin/aplicativos" routerLinkActive="active"
       ><i class="bi bi-grid-3x3-gap"></i> Aplicativos</a
+    ><a routerLink="/admin/comandos" routerLinkActive="active"
+      ><i class="bi bi-keyboard"></i> Comandos</a
     ><a routerLink="/admin/macros" routerLinkActive="active"
       ><i class="bi bi-lightning-charge"></i> Macros</a
     ><a routerLink="/admin/intents" routerLinkActive="active"
       ><i class="bi bi-chat-square-text"></i> Intents</a
-    ><a routerLink="/admin/dicionario" routerLinkActive="active"
-      ><i class="bi bi-journal-text"></i> Dicionário</a
     ><a routerLink="/admin/automacoes" routerLinkActive="active"
       ><i class="bi bi-clock-history"></i> Automações</a
     ><span class="nav-label">MONITORAR</span

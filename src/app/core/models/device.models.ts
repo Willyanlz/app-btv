@@ -10,6 +10,7 @@ export type RemoteKey =
   | 'VOLUME_UP'
   | 'VOLUME_DOWN'
   | 'MUTE';
+// As setas do componente visual são convertidas para DPAD_* antes do envio.
 export interface DeviceStatus {
   device: string;
   connection: 'device' | 'unauthorized' | 'offline' | 'unreachable' | 'unknown';

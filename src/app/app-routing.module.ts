@@ -26,13 +26,6 @@ const routes: Routes = [
           import('./features/remote/remote.module').then((m) => m.RemoteModule),
       },
       {
-        path: 'comando',
-        loadChildren: () =>
-          import('./features/voice-command/voice-command.module').then(
-            (m) => m.VoiceCommandModule,
-          ),
-      },
-      {
         path: 'admin',
         loadChildren: () =>
           import('./features/admin/admin.module').then((m) => m.AdminModule),

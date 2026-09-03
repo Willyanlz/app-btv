@@ -12,7 +12,7 @@
     </button>
   </div>
   <div class="row g-3 mb-4">
-    <div class="col-6 col-lg-3" *ngFor="let metric of data.metrics">
+    <div class="col-6 col-lg-3" *ngFor="let metric of metrics">
       <div class="panel p-3 h-100">
         <div class="stat-icon mb-3">
           <i class="bi" [ngClass]="metric.icon"></i>
@@ -40,7 +40,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let item of data.executions">
+              <tr *ngFor="let item of executions">
                 <td>{{ item.macro }}</td>
                 <td>{{ item.device }}</td>
                 <td>

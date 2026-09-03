@@ -6,6 +6,7 @@ import { AdminOverviewComponent } from './pages/admin-overview.component';
 import { CatalogComponent } from './pages/catalog.component';
 import { AutomationsComponent } from './pages/automations.component';
 import { OperationsComponent } from './pages/operations.component';
+import { MacroEditorComponent } from './pages/macro-editor.component';
 const routes: Routes = [
   { path: '', component: AdminOverviewComponent },
   {
@@ -27,13 +28,17 @@ const routes: Routes = [
     },
   },
   {
-    path: 'macros',
+    path: 'comandos',
     component: CatalogComponent,
     data: {
-      kind: 'macros',
-      title: 'Macros',
-      subtitle: 'Crie e publique sequências de ações seguras.',
+      kind: 'commands',
+      title: 'Comandos',
+      subtitle: 'Dicionário de texto amigável para teclas ADB.',
     },
+  },
+  {
+    path: 'macros',
+    component: MacroEditorComponent,
   },
   {
     path: 'intents',
@@ -42,15 +47,6 @@ const routes: Routes = [
       kind: 'intents',
       title: 'Intents',
       subtitle: 'Associe frases naturais às macros permitidas.',
-    },
-  },
-  {
-    path: 'dicionario',
-    component: CatalogComponent,
-    data: {
-      kind: 'dictionary',
-      title: 'Dicionário',
-      subtitle: 'Aliases, sinônimos, ações e categorias.',
     },
   },
   { path: 'automacoes', component: AutomationsComponent },
@@ -86,6 +82,7 @@ const routes: Routes = [
     CatalogComponent,
     AutomationsComponent,
     OperationsComponent,
+    MacroEditorComponent,
   ],
   imports: [
     CommonModule,

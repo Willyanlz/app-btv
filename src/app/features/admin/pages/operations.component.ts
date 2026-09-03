@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { MockDataService } from '../../../core/services/mock-data.service';
+import { DeviceService } from '../../../core/services/device.service';
 @Component({
   selector: 'app-operations',
   templateUrl: './operations.component.html',
   styleUrls: ['./operations.component.scss'],
 })
 export class OperationsComponent implements OnInit {
+  executions: any[] = [];
   kind = '';
   title = '';
   message = '';
@@ -27,12 +28,13 @@ export class OperationsComponent implements OnInit {
   ];
   constructor(
     private route: ActivatedRoute,
-    public data: MockDataService,
+    private readonly devices: DeviceService,
   ) {}
   ngOnInit() {
     this.route.data.subscribe((d) => {
       this.kind = d['kind'];
       this.title = d['title'];
     });
+    this.devices.logs().subscribe((logs) => this.executions = logs);
   }
 }
