@@ -43,11 +43,19 @@ export class ApiService {
     deviceId: string,
     macroId: string,
     variables: Record<string, string> = {},
+    openRequiredApp = false,
   ) {
     return this.http.post(
       `${this.base}/devices/${deviceId}/macros/${macroId}/run`,
-      { variables },
+      { variables, openRequiredApp },
     );
+  }
+  preflightMacro(deviceId: string, macroId: string) {
+    return this.http.get<{
+      ready: boolean;
+      requiredApp: { packageName: string; name: string } | null;
+      foregroundPackage?: string | null;
+    }>(`${this.base}/devices/${deviceId}/macros/${macroId}/preflight`);
   }
   runCommand(commandId: string) {
     return this.http.post(`${this.base}/commands/${commandId}/run`, {});

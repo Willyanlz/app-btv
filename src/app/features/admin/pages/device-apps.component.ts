@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ApiService, DeviceApp } from '../../../core/services/api.service';
 import { Router } from '@angular/router';
 import { ToastService } from '../../../core/services/toast.service';
+import { SelectedDeviceService } from '../../../core/services/selected-device.service';
 
 @Component({
   selector: 'app-device-apps',
@@ -22,14 +23,20 @@ export class DeviceAppsComponent implements OnInit, OnDestroy {
     private readonly api: ApiService,
     private readonly router: Router,
     private readonly toasts: ToastService,
+    private readonly selectedDevice: SelectedDeviceService,
   ) {}
 
   ngOnInit() {
     this.api.list<any>('devices').subscribe((devices) => {
       this.devices = devices.filter((device) => device.enabled);
-      this.deviceId = this.devices[0]?.id ?? '';
+      this.deviceId = this.selectedDevice.resolve(this.devices);
       if (this.deviceId) this.load();
     });
+  }
+
+  onDeviceChange() {
+    this.selectedDevice.select(this.deviceId);
+    this.load();
   }
 
   ngOnDestroy() {

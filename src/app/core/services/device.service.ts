@@ -15,7 +15,9 @@ export class DeviceService {
   constructor(private readonly http: HttpClient) {}
 
   status(deviceId: string) {
-    return this.http.get<DeviceStatus>(`${this.base}/devices/${deviceId}/status`);
+    return this.http.get<DeviceStatus>(
+      `${this.base}/devices/${deviceId}/status`,
+    );
   }
   key(deviceId: string, key: RemoteKey) {
     return this.http.post(`${this.base}/devices/${deviceId}/key`, { key });
@@ -35,6 +37,22 @@ export class DeviceService {
       `${this.base}/devices/${deviceId}/diagnose`,
       {},
     );
+  }
+  tailscaleAlwaysOn(deviceId: string) {
+    return this.http.get<{
+      enabled: boolean;
+      application: string | null;
+      lockdown: boolean;
+    }>(`${this.base}/devices/${deviceId}/settings/tailscale-always-on`);
+  }
+  setTailscaleAlwaysOn(deviceId: string, enabled: boolean) {
+    return this.http.put<{
+      enabled: boolean;
+      application: string | null;
+      lockdown: boolean;
+    }>(`${this.base}/devices/${deviceId}/settings/tailscale-always-on`, {
+      enabled,
+    });
   }
   logs() {
     return this.http.get<ExecutionLog[]>(`${this.base}/logs`);

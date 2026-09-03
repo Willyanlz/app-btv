@@ -7,21 +7,30 @@
     <div class="device-pill" *ngIf="devices.length" [class.ok]="online">
       <span></span>
       <div>
-        <strong>{{ devices[0].name }}</strong>
-        <small>{{ online ? 'Conectada' : 'Offline' }}</small>
+        <select
+          class="device-select"
+          [(ngModel)]="deviceId"
+          (ngModelChange)="onDeviceChange()"
+          aria-label="Dispositivo selecionado"
+        >
+          <option *ngFor="let device of devices" [value]="device.id">
+            {{ device.name }}
+          </option>
+        </select>
+        <small>{{ online ? "Conectada" : "TV desconectada" }}</small>
       </div>
     </div>
   </header>
   <div class="running-banner" *ngIf="running" role="status">
-    <span class="spinner-border spinner-border-sm me-2"></span
-    >Executando {{ runningName }}...
+    <span class="spinner-border spinner-border-sm me-2"></span>Executando
+    {{ runningName }}...
   </div>
   <section class="app-grid" *ngIf="macros.length">
     <button
       class="app-card"
       *ngFor="let macro of macros"
       (click)="choose(macro)"
-      [disabled]="running"
+      [disabled]="running || checkingMacro"
     >
       <span class="app-icon neutral"><i class="bi bi-play-fill"></i></span
       ><strong>{{ macro.name }}</strong
@@ -72,5 +81,39 @@
         </button>
       </div>
     </form>
+  </div>
+  <div class="modal-layer" *ngIf="appConfirmation">
+    <div class="panel editor">
+      <div class="modal-heading">
+        <span class="modal-icon"><i class="bi bi-grid"></i></span>
+        <div>
+          <small>APLICATIVO FECHADO</small>
+          <h2>{{ appConfirmation.appName }} não está aberto</h2>
+        </div>
+        <button
+          type="button"
+          class="modal-close"
+          (click)="appConfirmation = null"
+          aria-label="Fechar"
+        >
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <p class="text-muted-custom mt-3 mb-0">
+        Deseja abri-lo antes de executar a macro?
+      </p>
+      <div class="d-flex justify-content-end gap-2 mt-4">
+        <button
+          type="button"
+          class="btn btn-outline-secondary"
+          (click)="appConfirmation = null"
+        >
+          Cancelar
+        </button>
+        <button type="button" class="btn btn-accent" (click)="confirmOpenApp()">
+          Sim, abrir
+        </button>
+      </div>
+    </div>
   </div>
 </div>

@@ -5,7 +5,7 @@
       <h1>Editor visual</h1>
       <p class="lead-copy">Monte comandos sem escrever códigos ADB.</p>
     </div>
-    <button class="btn btn-accent" (click)="create()">
+    <button class="btn btn-accent" [disabled]="saving" (click)="create()">
       <i class="bi bi-plus-lg"></i> Nova macro
     </button>
   </div>
@@ -32,10 +32,7 @@
           title="Clonar macro (criar cópia)"
         >
           <i class="bi bi-copy"></i></button
-        ><button
-          class="btn btn-sm btn-outline-danger"
-          (click)="remove(macro)"
-        >
+        ><button class="btn btn-sm btn-outline-danger" (click)="remove(macro)">
           <i class="bi bi-trash"></i>
         </button>
       </div>
@@ -49,6 +46,7 @@
           type="button"
           class="btn-close btn-close-white"
           (click)="editing = null"
+          [disabled]="saving"
         ></button>
       </div>
       <small class="text-muted-custom d-block mb-1" *ngIf="deviceId"
@@ -73,6 +71,20 @@
         name="description"
         [(ngModel)]="editing.description"
       />
+      <label class="form-label mt-3">Aplicativo esperado</label>
+      <select
+        class="form-select"
+        name="appPackage"
+        [(ngModel)]="editing.appPackage"
+      >
+        <option value="">Não verificar aplicativo</option>
+        <option *ngFor="let app of apps" [value]="app.packageName">
+          {{ app.name || app.packageName }}
+        </option>
+      </select>
+      <small class="text-muted-custom">
+        Antes de executar, confirma se este aplicativo está aberto.
+      </small>
       <div class="form-check form-switch mt-3">
         <input
           class="form-check-input"
@@ -159,8 +171,8 @@
           <option value="">Selecione o aplicativo</option>
           <option *ngFor="let app of apps" [value]="app.packageName">
             {{ app.name || app.packageName }}
-          </option>
-        </select><select
+          </option></select
+        ><select
           *ngIf="step.type === 'callMacro'"
           class="form-control mt-2"
           [name]="'call' + i"
@@ -204,10 +216,14 @@
           type="button"
           class="btn btn-outline-secondary"
           (click)="editing = null"
+          [disabled]="saving"
         >
           Cancelar</button
-        ><button class="btn btn-accent" [disabled]="!editing.steps.length">
-          Salvar
+        ><button
+          class="btn btn-accent"
+          [disabled]="!editing.steps.length || saving"
+        >
+          {{ saving ? "Salvando..." : "Salvar" }}
         </button>
       </div>
     </form>

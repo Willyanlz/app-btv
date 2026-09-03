@@ -1,0 +1,65 @@
+.settings-card {
+  max-width: 760px;
+  padding: clamp(1.25rem, 4vw, 2rem);
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+}
+
+.setting-row h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+}
+
+.setting-row p {
+  margin: 0 0 0.65rem;
+  color: var(--muted);
+}
+
+.setting-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  color: var(--accent);
+  background: #15313b;
+  border-radius: 14px;
+  font-size: 1.25rem;
+}
+
+.status {
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.status.enabled {
+  color: var(--accent);
+}
+
+.info-box {
+  display: flex;
+  gap: 0.7rem;
+  margin-top: 1.5rem;
+  padding: 1rem;
+  color: var(--muted);
+  background: rgb(255 255 255 / 3%);
+  border-radius: 12px;
+}
+
+@media (max-width: 650px) {
+  .setting-row {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .setting-row .btn {
+    width: 100%;
+  }
+}

@@ -15,7 +15,7 @@
         class="bi"
         [ngClass]="diagnosing ? 'bi-arrow-repeat spin' : 'bi-life-preserver'"
       ></i>
-      {{ diagnosing ? 'Verificando...' : 'A TV não está funcionando' }}
+      {{ diagnosing ? "Verificando..." : "A TV não está funcionando" }}
     </button>
   </div>
   <section class="panel p-4" [ngSwitch]="kind">
@@ -49,6 +49,7 @@
         <select
           class="form-select"
           [(ngModel)]="deviceId"
+          (ngModelChange)="onDeviceChange()"
           [disabled]="diagnosing"
         >
           <option *ngFor="let device of devices" [value]="device.id">
@@ -64,7 +65,9 @@
       >
         <i
           class="bi me-2"
-          [ngClass]="allOk() ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'"
+          [ngClass]="
+            allOk() ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'
+          "
         ></i
         >{{ verdict }}
       </div>
@@ -80,7 +83,9 @@
           ></i>
           <strong>{{ check.label }}</strong>
           <small>{{ check.detail }}</small>
-          <span class="guidance" *ngIf="!check.ok && guidance(check)">{{ guidance(check) }}</span>
+          <span class="guidance" *ngIf="!check.ok && guidance(check)">{{
+            guidance(check)
+          }}</span>
         </div>
       </div>
     </div>

@@ -30,21 +30,40 @@
         <span class="connection-badge" [class.ok]="connection === 'device'">
           <i
             class="bi"
-            [ngClass]="connection === 'device' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'"
+            [ngClass]="
+              connection === 'device'
+                ? 'bi-check-circle-fill'
+                : 'bi-exclamation-circle-fill'
+            "
           ></i>
-          {{ connection }}
+          {{ connectionLabel() }}
         </span>
       </div>
       <div class="mt-3">
-        <app-remote-pad (pressed)="press($event)"></app-remote-pad>
+        <app-remote-pad
+          [disabled]="screenshotEnabled && busy"
+          (pressed)="press($event)"
+        ></app-remote-pad>
         <div class="media-row">
-          <button (click)="press('VOLUME_DOWN')">
+          <button
+            [disabled]="screenshotEnabled && busy"
+            (click)="press('VOLUME_DOWN')"
+          >
             <i class="bi bi-volume-down"></i></button
-          ><button (click)="press('MUTE')">
+          ><button
+            [disabled]="screenshotEnabled && busy"
+            (click)="press('MUTE')"
+          >
             <i class="bi bi-volume-mute"></i></button
-          ><button (click)="press('PLAY_PAUSE')">
+          ><button
+            [disabled]="screenshotEnabled && busy"
+            (click)="press('PLAY_PAUSE')"
+          >
             <i class="bi bi-play-fill"></i></button
-          ><button (click)="press('VOLUME_UP')">
+          ><button
+            [disabled]="screenshotEnabled && busy"
+            (click)="press('VOLUME_UP')"
+          >
             <i class="bi bi-volume-up"></i>
           </button>
         </div>
@@ -54,10 +73,10 @@
             [(ngModel)]="text"
             name="text"
             placeholder="Texto para a TV"
-            [disabled]="busy"
+            [disabled]="screenshotEnabled && busy"
           /><button
             class="btn btn-accent"
-            [disabled]="!deviceId || !text || busy"
+            [disabled]="!deviceId || !text || (screenshotEnabled && busy)"
           >
             Enviar
           </button>
@@ -71,15 +90,25 @@
           <label class="small-toggle">
             <input
               type="checkbox"
+              [ngModel]="screenshotEnabled"
+              (ngModelChange)="toggleScreenshot($event)"
+              name="screenshotEnabled"
+            />
+            Screenshot
+          </label>
+          <label class="small-toggle">
+            <input
+              type="checkbox"
               [(ngModel)]="autoRefresh"
               name="autoRefresh"
+              [disabled]="!screenshotEnabled"
             />
             Automático
           </label>
           <button
             class="btn btn-sm btn-outline-secondary"
             (click)="refreshScreen()"
-            [disabled]="!deviceId || busy"
+            [disabled]="!screenshotEnabled || !deviceId || busy"
             title="Atualizar tela agora"
           >
             <i class="bi bi-arrow-repeat"></i>
@@ -91,11 +120,15 @@
           <img [src]="screenshotUrl" alt="Tela atual da TV" />
         </ng-container>
         <ng-container *ngIf="screenState === 'idle'">
-          <i class="bi bi-tv"></i><span>Selecione um dispositivo para ver a tela.</span>
+          <i class="bi bi-tv"></i>
+          <span *ngIf="screenshotEnabled"
+            >Selecione um dispositivo para ver a tela.</span
+          >
+          <span *ngIf="!screenshotEnabled"
+            >Ative Screenshot para acompanhar a tela.</span
+          >
         </ng-container>
-        <ng-container
-          *ngIf="screenState === 'loading' && !screenshotUrl"
-        >
+        <ng-container *ngIf="screenState === 'loading' && !screenshotUrl">
           <i class="bi bi-camera"></i><span>Capturando a tela...</span>
         </ng-container>
         <ng-container *ngIf="screenState === 'error'">

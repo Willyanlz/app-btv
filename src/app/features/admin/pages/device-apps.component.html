@@ -18,7 +18,7 @@
   ><select
     class="form-select mb-3"
     [(ngModel)]="deviceId"
-    (ngModelChange)="load()"
+    (ngModelChange)="onDeviceChange()"
   >
     <option value="">Selecione</option>
     <option *ngFor="let device of devices" [value]="device.id">

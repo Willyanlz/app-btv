@@ -32,6 +32,10 @@
   background: #1c2a3f;
   color: var(--ink);
 }
+.media-row button:disabled {
+  opacity: 0.42;
+  cursor: wait;
+}
 .small-toggle {
   display: inline-flex;
   align-items: center;

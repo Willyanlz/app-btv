@@ -4,6 +4,7 @@ import { DeviceService } from '../../../core/services/device.service';
 import { ApiService } from '../../../core/services/api.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { DiagnosticCheck } from '../../../core/models/device.models';
+import { SelectedDeviceService } from '../../../core/services/selected-device.service';
 
 @Component({
   selector: 'app-operations',
@@ -30,6 +31,7 @@ export class OperationsComponent implements OnInit {
     private readonly deviceSvc: DeviceService,
     private readonly api: ApiService,
     private readonly toasts: ToastService,
+    private readonly selectedDevice: SelectedDeviceService,
   ) {}
 
   ngOnInit() {
@@ -40,8 +42,12 @@ export class OperationsComponent implements OnInit {
     this.deviceSvc.logs().subscribe((logs) => (this.executions = logs));
     this.api.list<any>('devices').subscribe((rows) => {
       this.devices = rows.filter((device) => device.enabled);
-      this.deviceId = this.devices[0]?.id ?? '';
+      this.deviceId = this.selectedDevice.resolve(this.devices);
     });
+  }
+
+  onDeviceChange() {
+    this.selectedDevice.select(this.deviceId);
   }
 
   diagnose() {

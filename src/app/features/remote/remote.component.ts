@@ -4,6 +4,7 @@ import { filter, takeUntil } from 'rxjs/operators';
 import { ApiService } from '../../core/services/api.service';
 import { DeviceService } from '../../core/services/device.service';
 import { ToastService } from '../../core/services/toast.service';
+import { SelectedDeviceService } from '../../core/services/selected-device.service';
 import { RemoteKey } from '../../core/models/device.models';
 
 @Component({
@@ -19,7 +20,10 @@ export class RemoteComponent implements OnInit, OnDestroy {
   screenshotUrl = '';
   screenState: 'idle' | 'loading' | 'ok' | 'error' = 'idle';
   autoRefresh = false;
+  screenshotEnabled = false;
   busy = false;
+  private lastAction = '';
+  private lastActionAt = 0;
 
   private readonly destroy$ = new Subject<void>();
 
@@ -27,14 +31,14 @@ export class RemoteComponent implements OnInit, OnDestroy {
     private readonly api: ApiService,
     private readonly device: DeviceService,
     private readonly toasts: ToastService,
+    private readonly selectedDevice: SelectedDeviceService,
   ) {}
 
   ngOnInit() {
     this.api.list<any>('devices').subscribe((rows) => {
       this.devices = rows.filter((item) => item.enabled);
-      this.deviceId = this.devices[0]?.id ?? '';
+      this.deviceId = this.selectedDevice.resolve(this.devices);
       this.test();
-      this.refreshScreen();
     });
     interval(5000)
       .pipe(
@@ -42,6 +46,7 @@ export class RemoteComponent implements OnInit, OnDestroy {
         filter(
           () =>
             this.autoRefresh &&
+            this.screenshotEnabled &&
             document.visibilityState === 'visible' &&
             !!this.deviceId &&
             !this.busy,
@@ -55,6 +60,7 @@ export class RemoteComponent implements OnInit, OnDestroy {
           () =>
             document.visibilityState === 'visible' &&
             this.autoRefresh &&
+            this.screenshotEnabled &&
             !!this.deviceId &&
             !this.busy,
         ),
@@ -69,28 +75,29 @@ export class RemoteComponent implements OnInit, OnDestroy {
   }
 
   onDeviceChange() {
+    this.selectedDevice.select(this.deviceId);
     this.revokeScreen();
     this.screenState = 'idle';
     this.test();
-    this.refreshScreen();
+    if (this.screenshotEnabled) this.refreshScreen();
   }
 
   press(key: RemoteKey) {
-    if (!this.deviceId || this.busy) return;
+    if (!this.deviceId || (this.screenshotEnabled && this.busy)) return;
+    if (this.isAccidentalRepeat(key)) return;
     const aliases: Record<string, string> = {
       UP: 'DPAD_UP',
       DOWN: 'DPAD_DOWN',
       LEFT: 'DPAD_LEFT',
       RIGHT: 'DPAD_RIGHT',
     };
-    this.busy = true;
+    if (this.screenshotEnabled) this.busy = true;
     this.device
       .key(this.deviceId, (aliases[key] ?? key) as RemoteKey)
       .subscribe({
         next: () => {
-          this.busy = false;
           this.connection = 'device';
-          this.refreshAfterCommand();
+          if (this.screenshotEnabled) this.refreshAfterCommand();
         },
         error: (error) => {
           this.busy = false;
@@ -103,15 +110,16 @@ export class RemoteComponent implements OnInit, OnDestroy {
   }
 
   sendText() {
-    if (!this.deviceId || !this.text || this.busy) return;
+    if (!this.deviceId || !this.text || (this.screenshotEnabled && this.busy)) {
+      return;
+    }
     const value = this.text;
-    this.busy = true;
+    if (this.screenshotEnabled) this.busy = true;
     this.device.type(this.deviceId, value).subscribe({
       next: () => {
-        this.busy = false;
         this.text = '';
         this.toasts.success('Texto enviado');
-        this.refreshAfterCommand();
+        if (this.screenshotEnabled) this.refreshAfterCommand();
       },
       error: (error) => {
         this.busy = false;
@@ -130,14 +138,45 @@ export class RemoteComponent implements OnInit, OnDestroy {
     });
   }
 
-  refreshScreen(quiet = false) {
-    if (!this.deviceId) return;
+  connectionLabel() {
+    const labels: Record<string, string> = {
+      device: 'Conectada',
+      offline: 'TV desconectada',
+      unreachable: 'TV desconectada',
+      unauthorized: 'Confirme a autorização na TV',
+      unknown: 'Não verificada',
+    };
+    return labels[this.connection] ?? 'Não verificada';
+  }
+
+  toggleScreenshot(enabled: boolean) {
+    this.screenshotEnabled = enabled;
+    if (enabled) {
+      this.refreshScreen();
+      return;
+    }
+    this.autoRefresh = false;
+    this.busy = false;
+    this.screenState = 'idle';
+    this.revokeScreen();
+  }
+
+  refreshScreen(quiet = false, completed?: () => void) {
+    if (
+      !this.screenshotEnabled ||
+      !this.deviceId ||
+      document.visibilityState === 'hidden'
+    ) {
+      completed?.();
+      return;
+    }
     this.screenState = 'loading';
     this.device.screenshot(this.deviceId).subscribe({
       next: (url) => {
         this.revokeScreen();
         this.screenshotUrl = url;
         this.screenState = 'ok';
+        completed?.();
       },
       error: (error) => {
         this.screenState = 'error';
@@ -146,6 +185,7 @@ export class RemoteComponent implements OnInit, OnDestroy {
             error.error?.message ?? 'Não foi possível capturar a tela.',
           );
         }
+        completed?.();
       },
     });
   }
@@ -158,8 +198,16 @@ export class RemoteComponent implements OnInit, OnDestroy {
   }
 
   private refreshAfterCommand() {
-    timer(450)
+    timer(180)
       .pipe(takeUntil(this.destroy$))
-      .subscribe(() => this.refreshScreen());
+      .subscribe(() => this.refreshScreen(false, () => (this.busy = false)));
+  }
+
+  private isAccidentalRepeat(key: RemoteKey) {
+    const now = Date.now();
+    const accidental = this.lastAction === key && now - this.lastActionAt < 180;
+    this.lastAction = key;
+    this.lastActionAt = now;
+    return accidental;
   }
 }

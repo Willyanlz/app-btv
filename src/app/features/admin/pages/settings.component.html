@@ -1,0 +1,75 @@
+<div class="page">
+  <div class="page-head">
+    <div>
+      <p class="eyebrow">CONFIGURAÇÕES</p>
+      <h1>Conexão da TV</h1>
+      <p class="lead-copy">
+        Mantenha o acesso remoto disponível após reiniciar o aparelho.
+      </p>
+    </div>
+  </div>
+
+  <section class="panel settings-card">
+    <label class="form-label">Dispositivo</label>
+    <select
+      class="form-select"
+      [(ngModel)]="deviceId"
+      (ngModelChange)="onDeviceChange()"
+      [disabled]="saving"
+    >
+      <option value="">Selecione</option>
+      <option *ngFor="let device of devices" [value]="device.id">
+        {{ device.name }}
+      </option>
+    </select>
+
+    <div class="setting-row">
+      <div class="setting-icon"><i class="bi bi-diagram-3"></i></div>
+      <div class="flex-grow-1">
+        <h2>Tailscale sempre ativo</h2>
+        <p>
+          Faz o Android iniciar e reconectar o Tailscale automaticamente ao
+          ligar. O bloqueio de internet sem VPN permanece desativado.
+        </p>
+        <span class="status" [class.enabled]="status?.enabled">
+          <i
+            class="bi"
+            [ngClass]="status?.enabled ? 'bi-check-circle-fill' : 'bi-circle'"
+          ></i>
+          {{
+            loading
+              ? "Verificando..."
+              : status?.enabled
+                ? "Ativado"
+                : "Desativado"
+          }}
+        </span>
+      </div>
+      <button
+        *ngIf="!status?.enabled"
+        class="btn btn-accent"
+        [disabled]="loading || saving || !deviceId"
+        (click)="setEnabled(true)"
+      >
+        {{ saving ? "Configurando..." : "Ativar" }}
+      </button>
+      <button
+        *ngIf="status?.enabled"
+        class="btn btn-outline-danger"
+        [disabled]="loading || saving"
+        (click)="setEnabled(false)"
+      >
+        {{ saving ? "Desativando..." : "Desativar" }}
+      </button>
+    </div>
+
+    <div class="info-box">
+      <i class="bi bi-info-circle"></i>
+      <span>
+        Alguns fabricantes bloqueiam esta alteração por ADB. Nesse caso, a
+        interface informa o erro e você ainda pode ativar manualmente nas
+        configurações de VPN da TV.
+      </span>
+    </div>
+  </section>
+</div>

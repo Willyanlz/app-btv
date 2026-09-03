@@ -7,6 +7,7 @@ import { CatalogComponent } from './pages/catalog.component';
 import { OperationsComponent } from './pages/operations.component';
 import { MacroEditorComponent } from './pages/macro-editor.component';
 import { DeviceAppsComponent } from './pages/device-apps.component';
+import { SettingsComponent } from './pages/settings.component';
 const routes: Routes = [
   { path: '', component: AdminOverviewComponent },
   {
@@ -45,6 +46,10 @@ const routes: Routes = [
     component: OperationsComponent,
     data: { kind: 'diagnostics', title: 'Diagnóstico' },
   },
+  {
+    path: 'configuracoes',
+    component: SettingsComponent,
+  },
 ];
 @NgModule({
   declarations: [
@@ -53,6 +58,7 @@ const routes: Routes = [
     OperationsComponent,
     MacroEditorComponent,
     DeviceAppsComponent,
+    SettingsComponent,
   ],
   imports: [
     CommonModule,
