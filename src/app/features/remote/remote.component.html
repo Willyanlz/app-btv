@@ -5,7 +5,61 @@
       <h1>Controle da BTV</h1>
       <p class="lead-copy">Nenhum comando é enviado automaticamente.</p>
     </div>
+    <button
+      class="btn btn-outline-info"
+      type="button"
+      [disabled]="!deviceId || identifyingScreen"
+      (click)="identifyScreen()"
+    >
+      <i class="bi bi-tv me-1"></i>
+      {{ identifyingScreen ? "Identificando..." : "Qual tela está aberta?" }}
+    </button>
   </div>
+  <section class="panel current-screen-card mb-3" *ngIf="showScreenInfo">
+    <div *ngIf="identifyingScreen && !currentScreen" class="text-muted-custom">
+      Identificando aplicativo e tela...
+    </div>
+    <ng-container *ngIf="currentScreen">
+      <div class="current-screen-icon"><i class="bi bi-tv"></i></div>
+      <div class="current-screen-copy">
+        <strong>{{
+          currentScreen.appName || "Aplicativo não identificado"
+        }}</strong>
+        <span *ngIf="currentScreen.screen; else unknownScreen">
+          {{ currentScreen.screen.name }}
+        </span>
+        <ng-template #unknownScreen>
+          <span>Tela ainda não cadastrada</span>
+        </ng-template>
+      </div>
+      <button
+        class="btn btn-sm btn-outline-secondary ms-auto"
+        type="button"
+        (click)="showScreenInfo = false"
+        aria-label="Fechar"
+      >
+        <i class="bi bi-x-lg"></i>
+      </button>
+      <form
+        *ngIf="!currentScreen.screen && currentScreen.packageName"
+        class="current-screen-save"
+        (ngSubmit)="saveCurrentScreen()"
+      >
+        <input
+          class="form-control"
+          name="newScreenName"
+          [(ngModel)]="newScreenName"
+          placeholder="Nome amigável, ex.: Tela inicial"
+        />
+        <button
+          class="btn btn-accent"
+          [disabled]="!newScreenName.trim() || identifyingScreen"
+        >
+          Salvar esta tela
+        </button>
+      </form>
+    </ng-container>
+  </section>
   <div class="remote-layout">
     <section class="panel p-3 remote-panel">
       <label class="form-label">Dispositivo</label>

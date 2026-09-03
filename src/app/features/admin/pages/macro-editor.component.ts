@@ -12,7 +12,7 @@ import { SelectedDeviceService } from '../../../core/services/selected-device.se
 export class MacroEditorComponent implements OnInit {
   macros: any[] = [];
   actions: any[] = [];
-  screens: { id: string; label: string; appName: string }[] = [];
+  screens: { id: string; name: string }[] = [];
   apps: { packageName: string; name: string }[] = [];
   editing: any = null;
   deviceId = '';
@@ -29,7 +29,6 @@ export class MacroEditorComponent implements OnInit {
   ngOnInit() {
     this.load();
     this.api.actions().subscribe((actions) => (this.actions = actions));
-    this.api.screens().subscribe((screens) => (this.screens = screens));
     this.api.list<any>('devices').subscribe((devices) => {
       const enabledDevices = devices.filter((item) => item.enabled);
       const selectedId = this.selectedDevice.resolve(enabledDevices);
@@ -42,6 +41,8 @@ export class MacroEditorComponent implements OnInit {
     if (packageName) {
       this.create();
       this.editing.name = `Abrir ${packageName}`;
+      this.editing.appPackage = packageName;
+      this.loadScreens(packageName);
       this.editing.steps.push({ type: 'openApp', packageName });
     }
   }
@@ -50,6 +51,7 @@ export class MacroEditorComponent implements OnInit {
     this.api.list<any>('macros').subscribe((rows) => (this.macros = rows));
   }
   create() {
+    this.screens = [];
     this.editing = {
       id: '',
       name: '',
@@ -71,6 +73,7 @@ export class MacroEditorComponent implements OnInit {
       steps: this.cloneSteps(macro.steps),
       isNew: false,
     };
+    this.loadScreens(macro.appPackage);
   }
   clone(macro: any) {
     this.editing = {
@@ -81,6 +84,7 @@ export class MacroEditorComponent implements OnInit {
       steps: this.cloneSteps(macro.steps),
       isNew: true,
     };
+    this.loadScreens(macro.appPackage);
   }
   add(action: any) {
     this.editing.steps.push(this.newStep(action));
@@ -107,14 +111,47 @@ export class MacroEditorComponent implements OnInit {
   atomicActions() {
     return this.actions.filter((action) => action.type !== 'screenCondition');
   }
+  availableActions() {
+    return this.actions.filter(
+      (action) => action.type !== 'screenCondition' || this.screens.length,
+    );
+  }
   screenLabel(screenId: string) {
-    return this.screens.find((screen) => screen.id === screenId)?.label;
+    return this.screens.find((screen) => screen.id === screenId)?.name;
+  }
+  onExpectedAppChange(packageName: string) {
+    const conditions = this.editing.steps.filter(
+      (step: any) => step.type === 'screenCondition',
+    );
+    if (
+      conditions.length &&
+      !confirm(
+        'Trocar o aplicativo removerá as condições de tela incompatíveis. Deseja continuar?',
+      )
+    ) {
+      return;
+    }
+    this.editing.appPackage = packageName;
+    if (conditions.length) {
+      this.editing.steps = this.editing.steps.filter(
+        (step: any) => step.type !== 'screenCondition',
+      );
+    }
+    this.loadScreens(packageName);
+  }
+  private loadScreens(packageName: string) {
+    this.screens = [];
+    if (!packageName) return;
+    this.api
+      .screens(packageName)
+      .subscribe((screens) => (this.screens = screens));
   }
   private newStep(action: any) {
     return action.type === 'screenCondition'
       ? {
           type: 'screenCondition',
           screenId: this.screens[0]?.id ?? '',
+          operator: 'is',
           whenTrue: [],
           whenFalse: [],
         }
@@ -133,6 +170,7 @@ export class MacroEditorComponent implements OnInit {
       ...step,
       ...(step.type === 'screenCondition'
         ? {
+            operator: step.operator ?? 'is',
             whenTrue: step.whenTrue.map((item: any) => ({ ...item })),
             whenFalse: step.whenFalse.map((item: any) => ({ ...item })),
           }
@@ -152,7 +190,8 @@ export class MacroEditorComponent implements OnInit {
   }
   label(step: any) {
     if (step.type === 'screenCondition') {
-      return `Se estiver em ${this.screenLabel(step.screenId) ?? 'uma tela'}`;
+      const operator = step.operator === 'isNot' ? 'não estiver' : 'estiver';
+      return `Se ${operator} em ${this.screenLabel(step.screenId) ?? 'uma tela'}`;
     }
     return (
       this.actions.find(

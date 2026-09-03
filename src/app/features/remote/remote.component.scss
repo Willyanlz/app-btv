@@ -76,3 +76,42 @@
     grid-template-columns: 1fr;
   }
 }
+.current-screen-card {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1rem;
+}
+.current-screen-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  color: var(--accent);
+  background: #203048;
+  border-radius: 13px;
+}
+.current-screen-copy {
+  display: flex;
+  flex-direction: column;
+}
+.current-screen-copy span {
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+.current-screen-save {
+  display: flex;
+  flex: 1 0 100%;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+}
+.current-screen-card:has(.current-screen-save) {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 576px) {
+  .current-screen-save {
+    flex-direction: column;
+  }
+}

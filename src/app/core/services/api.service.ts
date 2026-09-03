@@ -13,6 +13,18 @@ export interface DeviceApp {
   color: string;
   metadataPending: boolean;
 }
+export interface KnownScreen {
+  id: string;
+  packageName: string;
+  name: string;
+  activityName: string;
+}
+export interface CurrentScreen {
+  packageName: string | null;
+  appName: string | null;
+  activityName: string | null;
+  screen: KnownScreen | null;
+}
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
@@ -34,9 +46,41 @@ export class ApiService {
   actions() {
     return this.http.get<any[]>(`${this.base}/actions`);
   }
-  screens() {
-    return this.http.get<{ id: string; label: string; appName: string }[]>(
+  screens(packageName: string) {
+    return this.http.get<{ id: string; name: string }[]>(
       `${this.base}/screens`,
+      { params: { packageName } },
+    );
+  }
+  appScreens(packageName: string) {
+    return this.http.get<KnownScreen[]>(
+      `${this.base}/apps/${packageName}/screens`,
+    );
+  }
+  createAppScreen(
+    packageName: string,
+    value: { name: string; activityName: string },
+  ) {
+    return this.http.post<KnownScreen>(
+      `${this.base}/apps/${packageName}/screens`,
+      value,
+    );
+  }
+  updateAppScreen(id: string, value: { name: string; activityName: string }) {
+    return this.http.put<KnownScreen>(`${this.base}/app-screens/${id}`, value);
+  }
+  deleteAppScreen(id: string) {
+    return this.http.delete(`${this.base}/app-screens/${id}`);
+  }
+  captureAppScreen(deviceId: string, packageName: string, name: string) {
+    return this.http.post<KnownScreen>(
+      `${this.base}/devices/${deviceId}/apps/${packageName}/screens/capture`,
+      { name },
+    );
+  }
+  currentScreen(deviceId: string) {
+    return this.http.get<CurrentScreen>(
+      `${this.base}/devices/${deviceId}/current-screen`,
     );
   }
   runMacro(

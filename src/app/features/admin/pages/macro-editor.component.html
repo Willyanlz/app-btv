@@ -75,7 +75,8 @@
       <select
         class="form-select"
         name="appPackage"
-        [(ngModel)]="editing.appPackage"
+        [ngModel]="editing.appPackage"
+        (ngModelChange)="onExpectedAppChange($event)"
       >
         <option value="">Não verificar aplicativo</option>
         <option *ngFor="let app of apps" [value]="app.packageName">
@@ -137,7 +138,7 @@
         <button
           type="button"
           class="btn btn-sm btn-outline-info"
-          *ngFor="let action of actions"
+          *ngFor="let action of availableActions()"
           (click)="add(action)"
         >
           {{ action.label }}
@@ -182,25 +183,35 @@
           </div>
         </div>
         <div *ngIf="step.type === 'screenCondition'" class="condition-editor">
-          <label class="form-label">Qual tela deseja verificar?</label>
-          <select
-            class="form-select"
-            [name]="'screen' + i"
-            [(ngModel)]="step.screenId"
-            required
-          >
-            <option value="">Selecione uma tela</option>
-            <option *ngFor="let screen of screens" [value]="screen.id">
-              {{ screen.appName }} — {{ screen.label }}
-            </option>
-          </select>
+          <label class="form-label">Condição</label>
+          <div class="condition-selector">
+            <select
+              class="form-select"
+              [name]="'operator' + i"
+              [(ngModel)]="step.operator"
+            >
+              <option value="is">Se estiver em</option>
+              <option value="isNot">Se não estiver em</option>
+            </select>
+            <select
+              class="form-select"
+              [name]="'screen' + i"
+              [(ngModel)]="step.screenId"
+              required
+            >
+              <option value="">Selecione uma tela</option>
+              <option *ngFor="let screen of screens" [value]="screen.id">
+                {{ screen.name }}
+              </option>
+            </select>
+          </div>
           <div
             class="condition-branch condition-branch-yes"
             [class.mt-3]="true"
           >
             <div class="condition-branch-title">
               <i class="bi bi-check-circle"></i>
-              Se estiver nessa tela
+              Então, faça
             </div>
             <div class="condition-empty" *ngIf="!step.whenTrue.length">
               Nenhuma ação: continua para o próximo passo.
@@ -259,7 +270,7 @@
           <div class="condition-branch condition-branch-no">
             <div class="condition-branch-title">
               <i class="bi bi-x-circle"></i>
-              Se não estiver nessa tela
+              Caso contrário
             </div>
             <div class="condition-empty" *ngIf="!step.whenFalse.length">
               Nenhuma ação: continua para o próximo passo.

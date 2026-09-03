@@ -1,5 +1,9 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ApiService, DeviceApp } from '../../../core/services/api.service';
+import {
+  ApiService,
+  DeviceApp,
+  KnownScreen,
+} from '../../../core/services/api.service';
 import { Router } from '@angular/router';
 import { ToastService } from '../../../core/services/toast.service';
 import { SelectedDeviceService } from '../../../core/services/selected-device.service';
@@ -17,6 +21,12 @@ export class DeviceAppsComponent implements OnInit, OnDestroy {
   loading = false;
   uninstallApp: { packageName: string; name: string } | null = null;
   typedPackage = '';
+  screensApp: DeviceApp | null = null;
+  screens: KnownScreen[] = [];
+  screenName = '';
+  screenActivity = '';
+  editingScreenId = '';
+  savingScreen = false;
   private refreshTimer?: ReturnType<typeof setTimeout>;
 
   constructor(
@@ -99,6 +109,109 @@ export class DeviceAppsComponent implements OnInit, OnDestroy {
     this.router.navigate(['/admin/macros'], {
       queryParams: { app: packageName },
     });
+  }
+
+  manageScreens(app: DeviceApp) {
+    this.screensApp = app;
+    this.resetScreenForm();
+    this.loadScreens();
+  }
+
+  closeScreens() {
+    this.screensApp = null;
+    this.screens = [];
+    this.resetScreenForm();
+  }
+
+  loadScreens() {
+    if (!this.screensApp) return;
+    this.api.appScreens(this.screensApp.packageName).subscribe({
+      next: (screens) => (this.screens = screens),
+      error: () => this.toasts.error('Não foi possível carregar as telas.'),
+    });
+  }
+
+  captureScreen() {
+    if (!this.screensApp || !this.screenName.trim() || this.savingScreen)
+      return;
+    this.savingScreen = true;
+    this.api
+      .captureAppScreen(
+        this.deviceId,
+        this.screensApp.packageName,
+        this.screenName.trim(),
+      )
+      .subscribe({
+        next: () => {
+          this.savingScreen = false;
+          this.resetScreenForm();
+          this.loadScreens();
+          this.toasts.success('Tela atual cadastrada.');
+        },
+        error: (error) => {
+          this.savingScreen = false;
+          this.toasts.error(
+            error.error?.message ?? 'Não foi possível capturar esta tela.',
+          );
+        },
+      });
+  }
+
+  editScreen(screen: KnownScreen) {
+    this.editingScreenId = screen.id;
+    this.screenName = screen.name;
+    this.screenActivity = screen.activityName;
+  }
+
+  saveScreen() {
+    if (
+      !this.screensApp ||
+      !this.screenName.trim() ||
+      !this.screenActivity.trim() ||
+      this.savingScreen
+    ) {
+      return;
+    }
+    this.savingScreen = true;
+    const value = {
+      name: this.screenName.trim(),
+      activityName: this.screenActivity.trim(),
+    };
+    const request = this.editingScreenId
+      ? this.api.updateAppScreen(this.editingScreenId, value)
+      : this.api.createAppScreen(this.screensApp.packageName, value);
+    request.subscribe({
+      next: () => {
+        this.savingScreen = false;
+        this.resetScreenForm();
+        this.loadScreens();
+        this.toasts.success('Tela salva.');
+      },
+      error: (error) => {
+        this.savingScreen = false;
+        this.toasts.error(
+          error.error?.message ?? 'Não foi possível salvar a tela.',
+        );
+      },
+    });
+  }
+
+  deleteScreen(screen: KnownScreen) {
+    if (!confirm(`Excluir a tela "${screen.name}"?`)) return;
+    this.api.deleteAppScreen(screen.id).subscribe({
+      next: () => {
+        this.loadScreens();
+        this.toasts.success('Tela excluída.');
+      },
+      error: (error) =>
+        this.toasts.error(error.error?.message ?? 'Não foi possível excluir.'),
+    });
+  }
+
+  resetScreenForm() {
+    this.screenName = '';
+    this.screenActivity = '';
+    this.editingScreenId = '';
   }
 
   askUninstall(app: { packageName: string; name: string }) {

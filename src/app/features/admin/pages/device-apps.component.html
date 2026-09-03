@@ -64,6 +64,13 @@
         <i class="bi bi-plus-lg"></i>
       </button>
       <button
+        class="btn btn-sm btn-outline-info"
+        (click)="manageScreens(app)"
+        title="Editar aplicativo e telas conhecidas"
+      >
+        <i class="bi bi-pencil"></i>
+      </button>
+      <button
         class="btn btn-sm btn-outline-secondary"
         (click)="askUninstall(app)"
         title="Desinstalar"
@@ -99,6 +106,101 @@
           <i class="bi bi-trash me-1"></i>Desinstalar
         </button>
       </div>
+    </div>
+  </div>
+  <div class="modal-layer" *ngIf="screensApp">
+    <div class="panel editor p-4">
+      <div class="d-flex justify-content-between align-items-start gap-3">
+        <div>
+          <small class="eyebrow">TELAS CONHECIDAS</small>
+          <h2 class="h5 mb-1">
+            {{ screensApp.name || screensApp.packageName }}
+          </h2>
+        </div>
+        <button class="modal-close" type="button" (click)="closeScreens()">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="known-screen-list mt-3">
+        <p class="text-muted-custom small" *ngIf="!screens.length">
+          Nenhuma tela cadastrada para este aplicativo.
+        </p>
+        <div class="known-screen-row" *ngFor="let screen of screens">
+          <div class="text-break">
+            <strong>{{ screen.name }}</strong>
+            <small class="d-block text-muted-custom">
+              {{ screen.activityName }}
+            </small>
+          </div>
+          <button
+            class="macro-icon-button"
+            type="button"
+            (click)="editScreen(screen)"
+            aria-label="Editar tela"
+          >
+            <i class="bi bi-pencil"></i>
+          </button>
+          <button
+            class="macro-icon-button macro-icon-button-danger"
+            type="button"
+            (click)="deleteScreen(screen)"
+            aria-label="Excluir tela"
+          >
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+      </div>
+
+      <hr />
+      <h3 class="h6">
+        {{ editingScreenId ? "Editar tela" : "Adicionar tela" }}
+      </h3>
+      <label class="form-label mt-2">Nome amigável</label>
+      <input
+        class="form-control"
+        name="screenName"
+        [(ngModel)]="screenName"
+        placeholder="Ex.: Tela de busca"
+      />
+      <button
+        *ngIf="!editingScreenId"
+        class="btn btn-accent w-100 mt-3"
+        type="button"
+        [disabled]="!screenName.trim() || savingScreen"
+        (click)="captureScreen()"
+      >
+        <i class="bi bi-crosshair me-1"></i>Capturar tela atual
+      </button>
+
+      <details class="advanced-screen mt-3" [open]="!!editingScreenId">
+        <summary>Opções avançadas</summary>
+        <label class="form-label mt-2">Código técnico da tela</label>
+        <input
+          class="form-control"
+          name="screenActivity"
+          [(ngModel)]="screenActivity"
+          placeholder="Código identificado pelo Android"
+        />
+        <button
+          class="btn btn-outline-info mt-3"
+          type="button"
+          [disabled]="
+            !screenName.trim() || !screenActivity.trim() || savingScreen
+          "
+          (click)="saveScreen()"
+        >
+          {{ editingScreenId ? "Salvar alterações" : "Adicionar manualmente" }}
+        </button>
+      </details>
+      <button
+        *ngIf="editingScreenId"
+        class="btn btn-outline-secondary mt-3"
+        type="button"
+        (click)="resetScreenForm()"
+      >
+        Cancelar edição
+      </button>
     </div>
   </div>
 </div>

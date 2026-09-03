@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { fromEvent, interval, Subject, timer } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
-import { ApiService } from '../../core/services/api.service';
+import { ApiService, CurrentScreen } from '../../core/services/api.service';
 import { DeviceService } from '../../core/services/device.service';
 import { ToastService } from '../../core/services/toast.service';
 import { SelectedDeviceService } from '../../core/services/selected-device.service';
@@ -22,6 +22,10 @@ export class RemoteComponent implements OnInit, OnDestroy {
   autoRefresh = false;
   screenshotEnabled = false;
   busy = false;
+  currentScreen: CurrentScreen | null = null;
+  identifyingScreen = false;
+  showScreenInfo = false;
+  newScreenName = '';
   private lastAction = '';
   private lastActionAt = 0;
 
@@ -78,6 +82,8 @@ export class RemoteComponent implements OnInit, OnDestroy {
     this.selectedDevice.select(this.deviceId);
     this.revokeScreen();
     this.screenState = 'idle';
+    this.currentScreen = null;
+    this.showScreenInfo = false;
     this.test();
     if (this.screenshotEnabled) this.refreshScreen();
   }
@@ -147,6 +153,55 @@ export class RemoteComponent implements OnInit, OnDestroy {
       unknown: 'Não verificada',
     };
     return labels[this.connection] ?? 'Não verificada';
+  }
+
+  identifyScreen() {
+    if (!this.deviceId || this.identifyingScreen) return;
+    this.identifyingScreen = true;
+    this.showScreenInfo = true;
+    this.api.currentScreen(this.deviceId).subscribe({
+      next: (screen) => {
+        this.currentScreen = screen;
+        this.identifyingScreen = false;
+      },
+      error: (error) => {
+        this.identifyingScreen = false;
+        this.toasts.error(
+          error.error?.message ?? 'Não foi possível identificar a tela.',
+        );
+      },
+    });
+  }
+
+  saveCurrentScreen() {
+    if (
+      !this.currentScreen?.packageName ||
+      !this.newScreenName.trim() ||
+      this.identifyingScreen
+    ) {
+      return;
+    }
+    this.identifyingScreen = true;
+    this.api
+      .captureAppScreen(
+        this.deviceId,
+        this.currentScreen.packageName,
+        this.newScreenName.trim(),
+      )
+      .subscribe({
+        next: () => {
+          this.newScreenName = '';
+          this.identifyingScreen = false;
+          this.toasts.success('Tela conhecida salva.');
+          this.identifyScreen();
+        },
+        error: (error) => {
+          this.identifyingScreen = false;
+          this.toasts.error(
+            error.error?.message ?? 'Não foi possível salvar a tela.',
+          );
+        },
+      });
   }
 
   toggleScreenshot(enabled: boolean) {
