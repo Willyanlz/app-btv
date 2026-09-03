@@ -43,8 +43,23 @@ export class ApiService {
   runCommand(commandId: string) {
     return this.http.post(`${this.base}/commands/${commandId}/run`, {});
   }
+  testMacro(
+    deviceId: string,
+    macroId: string,
+    from: number,
+    to: number,
+    variables: Record<string, string> = {},
+  ) {
+    return this.http.post(`${this.base}/devices/${deviceId}/macros/${macroId}/test`, {
+      from,
+      to,
+      variables,
+    });
+  }
   deviceApps(deviceId: string) {
-    return this.http.get<{ packageName: string }[]>(
+    return this.http.get<
+      { packageName: string; name: string; icon: string; color: string }[]
+    >(
       `${this.base}/devices/${deviceId}/apps`,
     );
   }

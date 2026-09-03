@@ -1,21 +1,31 @@
-import { Component, OnInit } from '@angular/core';
-import { forkJoin } from 'rxjs';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { forkJoin, interval, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { ApiService } from '../../core/services/api.service';
+import { DeviceService } from '../../core/services/device.service';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
   macros: any[] = [];
   devices: any[] = [];
   selectedMacro: any = null;
   inputValue = '';
-  message = '';
   running = false;
+  runningName = '';
+  online = false;
 
-  constructor(private readonly api: ApiService) {}
+  private readonly destroy$ = new Subject<void>();
+
+  constructor(
+    private readonly api: ApiService,
+    private readonly device: DeviceService,
+    private readonly toasts: ToastService,
+  ) {}
 
   ngOnInit() {
     forkJoin({
@@ -24,12 +34,31 @@ export class HomeComponent implements OnInit {
     }).subscribe(({ macros, devices }) => {
       this.macros = macros.filter((macro) => macro.enabled);
       this.devices = devices.filter((device) => device.enabled);
+      this.checkStatus();
+    });
+    interval(15000)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.checkStatus());
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  checkStatus() {
+    if (!this.devices.length) return;
+    this.device.status(this.devices[0].id).subscribe({
+      next: (status) => (this.online = status.connection === 'device'),
+      error: () => (this.online = false),
     });
   }
 
   choose(macro: any) {
     if (!this.devices.length) {
-      this.message = 'Cadastre um dispositivo antes de executar uma macro.';
+      this.toasts.error(
+        'Cadastre um dispositivo antes de executar uma macro.',
+      );
       return;
     }
     if (macro.requiresInput) {
@@ -49,16 +78,17 @@ export class HomeComponent implements OnInit {
 
   private execute(macro: any, variables: Record<string, string> = {}) {
     this.running = true;
-    this.message = `Executando ${macro.name}...`;
+    this.runningName = macro.name;
     this.api.runMacro(this.devices[0].id, macro.id, variables).subscribe({
       next: () => {
         this.running = false;
-        this.message = `${macro.name} executada.`;
+        this.toasts.success(`${macro.name} concluída.`);
       },
       error: (error) => {
         this.running = false;
-        this.message =
-          error.error?.message ?? 'Não foi possível executar a macro.';
+        this.toasts.error(
+          error.error?.message ?? `Não foi possível executar ${macro.name}.`,
+        );
       },
     });
   }

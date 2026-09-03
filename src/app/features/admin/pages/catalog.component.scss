@@ -16,6 +16,34 @@
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
 }
+.app-avatar {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  color: white;
+  border-radius: 12px;
+  font-size: 1.2rem;
+}
+.app-menu {
+  position: relative;
+}
+.app-menu summary {
+  list-style: none;
+}
+.app-menu-action {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  z-index: 3;
+  padding: 0.65rem 0.8rem;
+  color: #ff9aa2;
+  white-space: nowrap;
+  background: #172234;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
 
 @media (max-width: 576px) {
   .modal-layer {

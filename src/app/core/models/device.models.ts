@@ -23,3 +23,15 @@ export interface ExecutionLog {
   message: string;
   created_at: string;
 }
+export interface DiagnosticCheck {
+  id: string;
+  label: string;
+  ok: boolean;
+  detail: string;
+}
+export interface DiagnosticResult {
+  device: string;
+  online: boolean;
+  checks: DiagnosticCheck[];
+  checkedAt: string;
+}

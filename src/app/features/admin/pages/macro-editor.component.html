@@ -9,7 +9,6 @@
       <i class="bi bi-plus-lg"></i> Nova macro
     </button>
   </div>
-  <div class="alert alert-danger" *ngIf="error">{{ error }}</div>
   <section class="panel p-4">
     <div class="text-muted-custom" *ngIf="!macros.length">
       Nenhuma macro cadastrada.
@@ -24,11 +23,17 @@
           >{{ macro.steps.length }} passos · {{ macro.description }}</small
         >
       </div>
-      <div>
+      <div class="d-flex gap-1">
         <button class="btn btn-sm btn-outline-secondary" (click)="edit(macro)">
           <i class="bi bi-pencil"></i></button
         ><button
-          class="btn btn-sm btn-outline-danger ms-2"
+          class="btn btn-sm btn-outline-info"
+          (click)="clone(macro)"
+          title="Clonar macro (criar cópia)"
+        >
+          <i class="bi bi-copy"></i></button
+        ><button
+          class="btn btn-sm btn-outline-danger"
           (click)="remove(macro)"
         >
           <i class="bi bi-trash"></i>
@@ -46,6 +51,9 @@
           (click)="editing = null"
         ></button>
       </div>
+      <small class="text-muted-custom d-block mb-1" *ngIf="deviceId"
+        >Testes executam no dispositivo padrão ativo.</small
+      >
       <label class="form-label mt-3">Identificador</label
       ><input
         class="form-control"
@@ -150,9 +158,50 @@
         >
           <option value="">Selecione o aplicativo</option>
           <option *ngFor="let app of apps" [value]="app.packageName">
-            {{ app.packageName }}
+            <ng-container
+              *ngIf="app.name && app.name !== app.packageName; else pkgName"
+              >{{ app.name }}</ng-container
+            >
+            <ng-template #pkgName>{{ app.packageName }}</ng-template>
+          </option>
+        </select><select
+          *ngIf="step.type === 'callMacro'"
+          class="form-control mt-2"
+          [name]="'call' + i"
+          [(ngModel)]="step.macroId"
+        >
+          <option value="">Selecione a macro chamada</option>
+          <option *ngFor="let m of macros" [value]="m.id">
+            {{ m.name }}
           </option>
         </select>
+        <div class="d-flex flex-wrap gap-1 mt-2">
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-light"
+            [disabled]="testing"
+            (click)="test(i, i)"
+            title="Executar apenas este passo"
+          >
+            <i class="bi bi-play-fill me-1"></i>Testar</button
+          ><button
+            type="button"
+            class="btn btn-sm btn-outline-secondary"
+            [disabled]="testing"
+            (click)="test(0, i)"
+            title="Executar do início até este passo"
+          >
+            Até aqui</button
+          ><button
+            type="button"
+            class="btn btn-sm btn-outline-secondary"
+            [disabled]="testing"
+            (click)="test(i, editing.steps.length - 1)"
+            title="Executar deste passo até o fim"
+          >
+            Daqui
+          </button>
+        </div>
       </div>
       <div class="d-flex justify-content-end gap-2 mt-4">
         <button

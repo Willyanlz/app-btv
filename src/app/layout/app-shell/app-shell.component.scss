@@ -106,6 +106,17 @@
   color: var(--ink);
   background: var(--panel-soft);
 }
+.drawer nav a.sos {
+  color: #ffd9a8;
+  border: 1px solid rgba(246, 190, 91, 0.4);
+  background: rgba(246, 190, 91, 0.08);
+  margin: 0.35rem 0 0.1rem;
+}
+.drawer nav a.sos:hover,
+.drawer nav a.sos.active {
+  background: rgba(246, 190, 91, 0.16);
+  border-color: var(--warning);
+}
 .drawer nav a i {
   width: 20px;
 }

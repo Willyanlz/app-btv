@@ -1,23 +1,141 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { interval, Subject } from 'rxjs';
+import { filter, takeUntil } from 'rxjs/operators';
 import { ApiService } from '../../core/services/api.service';
 import { DeviceService } from '../../core/services/device.service';
+import { ToastService } from '../../core/services/toast.service';
 import { RemoteKey } from '../../core/models/device.models';
 
-@Component({ selector: 'app-remote', templateUrl: './remote.component.html', styleUrls: ['./remote.component.scss'] })
-export class RemoteComponent implements OnInit {
+@Component({
+  selector: 'app-remote',
+  templateUrl: './remote.component.html',
+  styleUrls: ['./remote.component.scss'],
+})
+export class RemoteComponent implements OnInit, OnDestroy {
   devices: any[] = [];
   deviceId = '';
   text = '';
-  feedback = '';
   connection = 'não verificado';
-  constructor(private readonly api: ApiService, private readonly device: DeviceService) {}
-  ngOnInit() { this.api.list<any>('devices').subscribe((rows) => { this.devices = rows.filter((x) => x.enabled); this.deviceId = this.devices[0]?.id ?? ''; }); }
-  press(key: RemoteKey) {
-    if (!this.deviceId) return this.show('Cadastre e selecione um dispositivo.');
-    const aliases: Record<string, string> = { UP: 'DPAD_UP', DOWN: 'DPAD_DOWN', LEFT: 'DPAD_LEFT', RIGHT: 'DPAD_RIGHT' };
-    this.device.key(this.deviceId, (aliases[key] ?? key) as RemoteKey).subscribe({ next: () => this.show('Comando enviado'), error: () => this.show('Não foi possível enviar.') });
+  screenshotUrl = '';
+  screenState: 'idle' | 'loading' | 'ok' | 'error' = 'idle';
+  autoRefresh = true;
+  busy = false;
+
+  private readonly destroy$ = new Subject<void>();
+
+  constructor(
+    private readonly api: ApiService,
+    private readonly device: DeviceService,
+    private readonly toasts: ToastService,
+  ) {}
+
+  ngOnInit() {
+    this.api.list<any>('devices').subscribe((rows) => {
+      this.devices = rows.filter((item) => item.enabled);
+      this.deviceId = this.devices[0]?.id ?? '';
+      this.test();
+      this.refreshScreen();
+    });
+    interval(5000)
+      .pipe(
+        takeUntil(this.destroy$),
+        filter(() => this.autoRefresh && !!this.deviceId && !this.busy),
+      )
+      .subscribe(() => this.refreshScreen(true));
   }
-  sendText() { if (this.deviceId && this.text) this.device.type(this.deviceId, this.text).subscribe({ next: () => { this.text = ''; this.show('Texto enviado'); }, error: () => this.show('Não foi possível enviar.') }); }
-  test() { if (this.deviceId) this.device.status(this.deviceId).subscribe((status) => this.connection = status.connection); }
-  show(value: string) { this.feedback = value; setTimeout(() => this.feedback = '', 2500); }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.revokeScreen();
+  }
+
+  onDeviceChange() {
+    this.revokeScreen();
+    this.screenState = 'idle';
+    this.test();
+    this.refreshScreen();
+  }
+
+  press(key: RemoteKey) {
+    if (!this.deviceId || this.busy) return;
+    const aliases: Record<string, string> = {
+      UP: 'DPAD_UP',
+      DOWN: 'DPAD_DOWN',
+      LEFT: 'DPAD_LEFT',
+      RIGHT: 'DPAD_RIGHT',
+    };
+    this.busy = true;
+    this.device
+      .key(this.deviceId, (aliases[key] ?? key) as RemoteKey)
+      .subscribe({
+        next: () => {
+          this.busy = false;
+          this.connection = 'device';
+          this.refreshScreen();
+        },
+        error: (error) => {
+          this.busy = false;
+          this.toasts.error(
+            error.error?.message ?? 'Não foi possível enviar o comando.',
+          );
+          this.refreshScreen();
+        },
+      });
+  }
+
+  sendText() {
+    if (!this.deviceId || !this.text || this.busy) return;
+    const value = this.text;
+    this.busy = true;
+    this.device.type(this.deviceId, value).subscribe({
+      next: () => {
+        this.busy = false;
+        this.text = '';
+        this.toasts.success('Texto enviado');
+        this.refreshScreen();
+      },
+      error: (error) => {
+        this.busy = false;
+        this.toasts.error(
+          error.error?.message ?? 'Não foi possível enviar o texto.',
+        );
+        this.refreshScreen();
+      },
+    });
+  }
+
+  test() {
+    if (!this.deviceId) return;
+    this.device.status(this.deviceId).subscribe((status) => {
+      this.connection = status.connection;
+    });
+  }
+
+  refreshScreen(quiet = false) {
+    if (!this.deviceId) return;
+    this.screenState = 'loading';
+    this.device.screenshot(this.deviceId).subscribe({
+      next: (url) => {
+        this.revokeScreen();
+        this.screenshotUrl = url;
+        this.screenState = 'ok';
+      },
+      error: (error) => {
+        this.screenState = 'error';
+        if (!quiet) {
+          this.toasts.error(
+            error.error?.message ?? 'Não foi possível capturar a tela.',
+          );
+        }
+      },
+    });
+  }
+
+  private revokeScreen() {
+    if (this.screenshotUrl) {
+      URL.revokeObjectURL(this.screenshotUrl);
+      this.screenshotUrl = '';
+    }
+  }
 }

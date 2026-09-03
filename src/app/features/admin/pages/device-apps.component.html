@@ -27,27 +27,73 @@
       {{ device.name }}
     </option>
   </select>
-  <div class="alert alert-info" *ngIf="message">{{ message }}</div>
-  <div class="alert alert-danger" *ngIf="error">{{ error }}</div>
   <section class="panel p-3">
     <p *ngIf="loading">Carregando...</p>
     <p *ngIf="!loading && !apps.length">
       Nenhum aplicativo de usuário encontrado.
     </p>
     <div
-      class="d-flex align-items-center gap-2 border-bottom py-3"
+      class="d-flex align-items-center gap-3 border-bottom py-3"
       *ngFor="let app of apps"
     >
-      <i class="bi bi-grid fs-4"></i
-      ><strong class="me-auto text-break">{{ app.packageName }}</strong
-      ><button class="btn btn-sm btn-accent" (click)="open(app.packageName)">
+      <span class="app-avatar" [style.background]="app.color"><i class="bi" [ngClass]="app.icon"></i></span>
+      <div class="me-auto text-break">
+        <strong>
+          <ng-container
+            *ngIf="app.name && app.name !== app.packageName; else pkgName"
+            >{{ app.name }}</ng-container
+          >
+          <ng-template #pkgName>{{ app.packageName }}</ng-template>
+        </strong>
+        <small class="d-block text-muted-custom">{{ app.packageName }}</small>
+      </div>
+      <button class="btn btn-sm btn-accent" (click)="open(app.packageName)">
         Abrir</button
       ><button
-        class="btn btn-sm btn-outline-danger"
-        (click)="uninstall(app.packageName)"
+        class="btn btn-sm btn-outline-info"
+        (click)="addToMacro(app.packageName)"
+        title="Adicionar a uma nova macro"
+      >
+        <i class="bi bi-plus-lg"></i>
+      </button>
+      <button
+        class="btn btn-sm btn-outline-secondary"
+        (click)="askUninstall(app)"
+        title="Desinstalar"
       >
         <i class="bi bi-trash"></i>
       </button>
     </div>
   </section>
+  <div class="modal-layer" *ngIf="uninstallApp">
+    <div class="panel editor p-4">
+      <h2 class="h5 mb-1">Desinstalar aplicativo</h2>
+      <p class="text-muted-custom small mb-3">
+        Esta ação remove
+        <strong
+          >{{ uninstallApp.name || uninstallApp.packageName }}</strong
+        >
+        da sua TV. Digite o nome do pacote abaixo para confirmar.
+      </p>
+      <code class="p-2">{{ uninstallApp.packageName }}</code>
+      <input
+        class="form-control mt-2"
+        [(ngModel)]="typedPackage"
+        name="typedPackage"
+        placeholder="Digite o pacote para confirmar"
+        autocomplete="off"
+      />
+      <div class="d-flex justify-content-end gap-2 mt-4">
+        <button class="btn btn-outline-secondary" (click)="cancelUninstall()">
+          Cancelar</button
+        ><button
+          class="btn btn-danger"
+          [disabled]="typedPackage.trim() !== uninstallApp.packageName"
+          (click)="confirmUninstall()"
+        >
+          <i class="bi bi-trash me-1"></i>Desinstalar
+        </button>
+      </div>
+    </div>
+  </div>
 </div>

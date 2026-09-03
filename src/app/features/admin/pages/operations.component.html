@@ -9,8 +9,13 @@
       class="btn btn-accent"
       *ngIf="kind === 'diagnostics'"
       (click)="diagnose()"
+      [disabled]="!deviceId || diagnosing"
     >
-      <i class="bi bi-arrow-repeat"></i> Reconectar
+      <i
+        class="bi"
+        [ngClass]="diagnosing ? 'bi-arrow-repeat spin' : 'bi-life-preserver'"
+      ></i>
+      {{ diagnosing ? 'Verificando...' : 'A TV não está funcionando' }}
     </button>
   </div>
   <section class="panel p-4" [ngSwitch]="kind">
@@ -38,15 +43,46 @@
         </tbody>
       </table>
     </div>
-    <div *ngSwitchCase="'diagnostics'" class="diagnostic-grid">
-      <p *ngIf="!checks.length">
-        Clique em diagnosticar para consultar o primeiro dispositivo ativo.
+    <div *ngSwitchCase="'diagnostics'">
+      <div class="mb-3" *ngIf="devices.length">
+        <label class="form-label">Dispositivo</label>
+        <select
+          class="form-select"
+          [(ngModel)]="deviceId"
+          [disabled]="diagnosing"
+        >
+          <option *ngFor="let device of devices" [value]="device.id">
+            {{ device.name }}
+          </option>
+        </select>
+      </div>
+      <div
+        class="alert py-3 mb-3"
+        [class.alert-success]="allOk()"
+        [class.alert-warning]="hasProblem()"
+        *ngIf="verdict"
+      >
+        <i
+          class="bi me-2"
+          [ngClass]="allOk() ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'"
+        ></i
+        >{{ verdict }}
+      </div>
+      <p *ngIf="!checks.length && !diagnosing" class="text-muted-custom">
+        Clique em "A TV não está funcionando" para verificar a rede, o aparelho
+        e o controle.
       </p>
-      <div *ngFor="let x of checks">
-        <small>{{ x.label }}</small
-        ><strong [class.ok]="x.ok">{{ x.value }}</strong>
+      <div class="diagnostic-grid">
+        <div *ngFor="let check of checks" [class.ok]="check.ok">
+          <i
+            class="bi"
+            [ngClass]="check.ok ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"
+          ></i>
+          <strong>{{ check.label }}</strong>
+          <small>{{ check.detail }}</small>
+          <span class="guidance" *ngIf="!check.ok && guidance(check)">{{ guidance(check) }}</span>
+        </div>
       </div>
     </div>
   </section>
-  <div class="alert alert-success mt-3" *ngIf="message">{{ message }}</div>
 </div>

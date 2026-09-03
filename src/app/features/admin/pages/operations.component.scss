@@ -6,24 +6,41 @@
 .diagnostic-grid div {
   display: flex;
   flex-direction: column;
+  gap: 0.45rem;
   padding: 1rem;
   background: #0b1523;
   border-radius: 12px;
 }
+.diagnostic-grid i {
+  font-size: 1.3rem;
+  color: var(--danger);
+}
+.diagnostic-grid div.ok {
+  background: #0b1c1a;
+}
+.diagnostic-grid div.ok i {
+  color: var(--accent);
+}
 .diagnostic-grid small {
   color: var(--muted);
 }
-.diagnostic-grid strong {
-  color: var(--danger);
+.diagnostic-grid .guidance {
+  font-size: 0.82rem;
+  color: #ffd9a8;
+  border-top: 1px dashed var(--line);
+  padding-top: 0.5rem;
 }
-.diagnostic-grid strong.ok {
-  color: var(--accent);
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
-.settings {
-  max-width: 500px;
+.spin {
+  animation: spin 1s linear infinite;
+  display: inline-block;
 }
 @media (max-width: 700px) {
   .diagnostic-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
   }
 }

@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../../../core/services/api.service';
+import { Router } from '@angular/router';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-device-apps',
@@ -8,13 +10,17 @@ import { ApiService } from '../../../core/services/api.service';
 })
 export class DeviceAppsComponent implements OnInit {
   devices: any[] = [];
-  apps: { packageName: string }[] = [];
+  apps: { packageName: string; name: string; icon: string; color: string }[] = [];
   deviceId = '';
   loading = false;
-  message = '';
-  error = '';
+  uninstallApp: { packageName: string; name: string } | null = null;
+  typedPackage = '';
 
-  constructor(private readonly api: ApiService) {}
+  constructor(
+    private readonly api: ApiService,
+    private readonly router: Router,
+    private readonly toasts: ToastService,
+  ) {}
 
   ngOnInit() {
     this.api.list<any>('devices').subscribe((devices) => {
@@ -27,7 +33,6 @@ export class DeviceAppsComponent implements OnInit {
   load() {
     if (!this.deviceId) return;
     this.loading = true;
-    this.error = '';
     this.api.deviceApps(this.deviceId).subscribe({
       next: (apps) => {
         this.apps = apps;
@@ -35,31 +40,56 @@ export class DeviceAppsComponent implements OnInit {
       },
       error: (error) => {
         this.loading = false;
-        this.error =
-          error.error?.message ?? 'Não foi possível listar os aplicativos.';
+        this.toasts.error(
+          error.error?.message ?? 'Não foi possível listar os aplicativos.',
+        );
       },
     });
   }
 
   open(packageName: string) {
-    this.message = `Abrindo ${packageName}...`;
     this.api.openDeviceApp(this.deviceId, packageName).subscribe({
-      next: () => (this.message = 'Aplicativo aberto.'),
+      next: () => this.toasts.success('Aplicativo aberto.'),
       error: (error) =>
-        (this.error =
-          error.error?.message ?? 'Não foi possível abrir o aplicativo.'),
+        this.toasts.error(
+          error.error?.message ?? 'Não foi possível abrir o aplicativo.',
+        ),
     });
   }
 
-  uninstall(packageName: string) {
-    if (!confirm(`Desinstalar ${packageName} da TV Box?`)) return;
-    this.api.uninstallDeviceApp(this.deviceId, packageName).subscribe({
+  addToMacro(packageName: string) {
+    this.router.navigate(['/admin/macros'], { queryParams: { app: packageName } });
+  }
+
+  askUninstall(app: { packageName: string; name: string }) {
+    this.uninstallApp = app;
+    this.typedPackage = '';
+  }
+
+  cancelUninstall() {
+    this.uninstallApp = null;
+    this.typedPackage = '';
+  }
+
+  confirmUninstall() {
+    if (
+      !this.uninstallApp ||
+      this.typedPackage.trim() !== this.uninstallApp.packageName
+    ) {
+      return;
+    }
+    const target = this.uninstallApp;
+    this.uninstallApp = null;
+    this.typedPackage = '';
+    this.api.uninstallDeviceApp(this.deviceId, target.packageName).subscribe({
       next: () => {
-        this.message = 'Aplicativo desinstalado.';
+        this.toasts.success('Aplicativo desinstalado.');
         this.load();
       },
       error: (error) =>
-        (this.error = error.error?.message ?? 'Não foi possível desinstalar.'),
+        this.toasts.error(
+          error.error?.message ?? 'Não foi possível desinstalar.',
+        ),
     });
   }
 
@@ -67,21 +97,20 @@ export class DeviceAppsComponent implements OnInit {
     const file = input.files?.[0];
     if (!file || !this.deviceId) return;
     if (!file.name.toLowerCase().endsWith('.apk')) {
-      this.error = 'Selecione um arquivo .apk válido.';
+      this.toasts.error('Selecione um arquivo .apk válido.');
       return;
     }
     this.loading = true;
-    this.message = `Instalando ${file.name}...`;
     this.api.installDeviceApp(this.deviceId, file).subscribe({
       next: () => {
         input.value = '';
         this.loading = false;
-        this.message = 'APK instalado com sucesso.';
+        this.toasts.success('APK instalado com sucesso.');
         this.load();
       },
       error: (error) => {
         this.loading = false;
-        this.error = error.error?.message ?? 'A instalação falhou.';
+        this.toasts.error(error.error?.message ?? 'A instalação falhou.');
       },
     });
   }

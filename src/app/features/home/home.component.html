@@ -1,10 +1,22 @@
 <div class="page">
-  <header class="mb-4">
-    <p class="eyebrow">CONTROLE</p>
-    <h1>O que deseja fazer?</h1>
+  <header class="mb-4 d-flex justify-content-between align-items-end gap-3">
+    <div>
+      <p class="eyebrow">CONTROLE</p>
+      <h1>O que deseja fazer?</h1>
+    </div>
+    <div class="device-pill" *ngIf="devices.length" [class.ok]="online">
+      <span></span>
+      <div>
+        <strong>{{ devices[0].name }}</strong>
+        <small>{{ online ? 'Conectada' : 'Offline' }}</small>
+      </div>
+    </div>
   </header>
-  <div class="alert alert-info" *ngIf="message">{{ message }}</div>
-  <section class="app-grid">
+  <div class="running-banner" *ngIf="running" role="status">
+    <span class="spinner-border spinner-border-sm me-2"></span
+    >Executando {{ runningName }}...
+  </div>
+  <section class="app-grid" *ngIf="macros.length">
     <button
       class="app-card"
       *ngFor="let macro of macros"
