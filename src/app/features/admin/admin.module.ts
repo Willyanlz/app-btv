@@ -4,7 +4,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
 import { AdminOverviewComponent } from './pages/admin-overview.component';
 import { CatalogComponent } from './pages/catalog.component';
-import { AutomationsComponent } from './pages/automations.component';
 import { OperationsComponent } from './pages/operations.component';
 import { MacroEditorComponent } from './pages/macro-editor.component';
 const routes: Routes = [
@@ -49,38 +48,21 @@ const routes: Routes = [
       subtitle: 'Associe frases naturais às macros permitidas.',
     },
   },
-  { path: 'automacoes', component: AutomationsComponent },
   {
     path: 'execucoes',
     component: OperationsComponent,
     data: { kind: 'executions', title: 'Execuções' },
   },
   {
-    path: 'filas',
-    component: OperationsComponent,
-    data: { kind: 'queues', title: 'Filas por dispositivo' },
-  },
-  {
     path: 'diagnostico',
     component: OperationsComponent,
     data: { kind: 'diagnostics', title: 'Diagnóstico' },
-  },
-  {
-    path: 'screenshots',
-    component: OperationsComponent,
-    data: { kind: 'screenshots', title: 'Screenshots' },
-  },
-  {
-    path: 'configuracoes',
-    component: OperationsComponent,
-    data: { kind: 'settings', title: 'Configurações' },
   },
 ];
 @NgModule({
   declarations: [
     AdminOverviewComponent,
     CatalogComponent,
-    AutomationsComponent,
     OperationsComponent,
     MacroEditorComponent,
   ],

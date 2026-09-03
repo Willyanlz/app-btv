@@ -59,3 +59,5 @@ Enquanto os endpoints `/api/v1` são implementados, os cadastros administrativos
 O PWA usa a API de produção em `https://box.labswill.com`. Dispositivos, aplicativos, macros, intenções e automações são persistidos pelo backend; não existem dados mockados nem cadastros locais no navegador.
 
 No editor de macros, escolha ações com nomes humanos, ordene os passos e preencha somente os parâmetros necessários. O código ADB correspondente fica restrito ao backend.
+
+A tela inicial exibe somente as macros ativas. Macros configuradas para solicitar entrada abrem uma pergunta antes da execução e enviam o valor para a variável definida, por exemplo `{{texto}}`. As antigas automações agendadas, filas, screenshots e configurações de capturas não fazem parte do fluxo atual.

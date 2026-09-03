@@ -39,39 +39,14 @@
       </table>
     </div>
     <div *ngSwitchCase="'diagnostics'" class="diagnostic-grid">
-      <p *ngIf="!checks.length">Clique em diagnosticar para consultar o primeiro dispositivo ativo.</p>
+      <p *ngIf="!checks.length">
+        Clique em diagnosticar para consultar o primeiro dispositivo ativo.
+      </p>
       <div *ngFor="let x of checks">
         <small>{{ x.label }}</small
         ><strong [class.ok]="x.ok">{{ x.value }}</strong>
       </div>
     </div>
-    <div *ngSwitchCase="'queues'" class="empty-box">
-      <i class="bi bi-check2-circle fs-2"></i>
-      <p class="mt-2 mb-0">Nenhuma execução aguardando na fila.</p>
-    </div>
-    <div *ngSwitchCase="'screenshots'" class="empty-box">
-      <i class="bi bi-images fs-2"></i>
-      <p class="mt-2 mb-0">As capturas da BTV aparecerão nesta galeria.</p>
-    </div>
-    <form *ngSwitchCase="'settings'" class="settings">
-      <label class="form-label">Retenção de screenshots</label
-      ><select class="form-select mb-3">
-        <option>7 dias</option>
-        <option>30 dias</option></select
-      ><label class="form-label">Timeout padrão</label>
-      <div class="input-group">
-        <input class="form-control" value="15" /><span class="input-group-text"
-          >segundos</span
-        >
-      </div>
-      <button
-        type="button"
-        class="btn btn-accent mt-4"
-        (click)="message = 'Configurações salvas'"
-      >
-        Salvar
-      </button>
-    </form>
   </section>
   <div class="alert alert-success mt-3" *ngIf="message">{{ message }}</div>
 </div>

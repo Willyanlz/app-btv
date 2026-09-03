@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { forkJoin } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
 
 @Component({
@@ -6,32 +7,59 @@ import { ApiService } from '../../core/services/api.service';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit {
+  macros: any[] = [];
+  devices: any[] = [];
+  selectedMacro: any = null;
+  inputValue = '';
   message = '';
-  error = false;
-  apps: any[] = [];
-  commands: any[] = [];
+  running = false;
 
-  constructor(private readonly api: ApiService) {
-    this.api.list<any>('apps').subscribe((apps) => (this.apps = apps));
-    this.api.list<any>('commands').subscribe((commands) => (this.commands = commands));
-  }
+  constructor(private readonly api: ApiService) {}
 
-  open(name: string) {
-    this.message = `${name}: aguardando conexão com a BTV`;
-    setTimeout(() => (this.message = ''), 2500);
-  }
-
-  runCommand(commandId: string, label: string) {
-    this.api.runCommand(commandId).subscribe({
-      next: () => this.notice(`${label} enviado`),
-      error: () => this.notice(`Falha ao enviar ${label}. A TV pode estar offline.`, true),
+  ngOnInit() {
+    forkJoin({
+      macros: this.api.list<any>('macros'),
+      devices: this.api.list<any>('devices'),
+    }).subscribe(({ macros, devices }) => {
+      this.macros = macros.filter((macro) => macro.enabled);
+      this.devices = devices.filter((device) => device.enabled);
     });
   }
 
-  notice(value: string, withError = false) {
-    this.message = value;
-    this.error = withError;
-    setTimeout(() => (this.message = ''), 2500);
+  choose(macro: any) {
+    if (!this.devices.length) {
+      this.message = 'Cadastre um dispositivo antes de executar uma macro.';
+      return;
+    }
+    if (macro.requiresInput) {
+      this.selectedMacro = macro;
+      this.inputValue = '';
+      return;
+    }
+    this.execute(macro);
+  }
+
+  confirmInput() {
+    if (!this.inputValue.trim()) return;
+    const macro = this.selectedMacro;
+    this.selectedMacro = null;
+    this.execute(macro, { [macro.inputVariable]: this.inputValue.trim() });
+  }
+
+  private execute(macro: any, variables: Record<string, string> = {}) {
+    this.running = true;
+    this.message = `Executando ${macro.name}...`;
+    this.api.runMacro(this.devices[0].id, macro.id, variables).subscribe({
+      next: () => {
+        this.running = false;
+        this.message = `${macro.name} executada.`;
+      },
+      error: (error) => {
+        this.running = false;
+        this.message =
+          error.error?.message ?? 'Não foi possível executar a macro.';
+      },
+    });
   }
 }

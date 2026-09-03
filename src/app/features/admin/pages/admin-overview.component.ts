@@ -9,5 +9,24 @@ import { ApiService } from '../../../core/services/api.service';
 export class AdminOverviewComponent {
   metrics: any[] = [];
   executions: any[] = [];
-  constructor(private readonly api: ApiService) { forkJoin({ devices: api.list<any>('devices'), macros: api.list<any>('macros'), automations: api.list<any>('automations') }).subscribe(({devices, macros, automations}) => this.metrics = [{label:'Dispositivos cadastrados',value:devices.length,icon:'bi-hdd-network'},{label:'Macros ativas',value:macros.filter(x=>x.enabled).length,icon:'bi-lightning'},{label:'Automações ativas',value:automations.filter(x=>x.enabled).length,icon:'bi-clock'}]); }
+  constructor(private readonly api: ApiService) {
+    forkJoin({
+      devices: api.list<any>('devices'),
+      macros: api.list<any>('macros'),
+    }).subscribe(
+      ({ devices, macros }) =>
+        (this.metrics = [
+          {
+            label: 'Dispositivos cadastrados',
+            value: devices.length,
+            icon: 'bi-hdd-network',
+          },
+          {
+            label: 'Macros ativas',
+            value: macros.filter((item) => item.enabled).length,
+            icon: 'bi-lightning',
+          },
+        ]),
+    );
+  }
 }

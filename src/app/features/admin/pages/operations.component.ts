@@ -14,10 +14,7 @@ export class OperationsComponent implements OnInit {
   message = '';
   descriptions: any = {
     executions: 'Histórico detalhado das ações realizadas.',
-    queues: 'Uma execução ativa por dispositivo.',
     diagnostics: 'Status técnico da conexão e do dispositivo.',
-    screenshots: 'Galeria de capturas associadas às execuções.',
-    settings: 'Timeouts, retenção e preferências da aplicação.',
   };
   checks: any[] = [];
   deviceId = '';
@@ -31,8 +28,13 @@ export class OperationsComponent implements OnInit {
       this.kind = d['kind'];
       this.title = d['title'];
     });
-    this.devices.logs().subscribe((logs) => this.executions = logs);
-    this.api.list<any>('devices').subscribe((devices) => this.deviceId = devices.find((device) => device.enabled)?.id ?? '');
+    this.devices.logs().subscribe((logs) => (this.executions = logs));
+    this.api
+      .list<any>('devices')
+      .subscribe(
+        (devices) =>
+          (this.deviceId = devices.find((device) => device.enabled)?.id ?? ''),
+      );
   }
 
   diagnose() {
@@ -43,7 +45,13 @@ export class OperationsComponent implements OnInit {
     this.message = 'Verificando conexão...';
     this.devices.status(this.deviceId).subscribe({
       next: (status) => {
-        this.checks = [{ label: 'ADB', value: status.connection, ok: status.connection === 'device' }];
+        this.checks = [
+          {
+            label: 'ADB',
+            value: status.connection,
+            ok: status.connection === 'device',
+          },
+        ];
         this.message = 'Diagnóstico concluído.';
       },
       error: () => {

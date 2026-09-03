@@ -1,50 +1,49 @@
 <div class="page">
-  <section class="hero">
-    <div>
-      <p class="eyebrow">BOA NOITE</p>
-      <h1>O que vamos assistir?</h1>
-      <p class="lead-copy">
-        Controle a BTV, abra seus aplicativos ou simplesmente diga o que deseja.
-      </p>
-    </div>
-    <a class="device-pill" routerLink="/admin/dispositivos"><span></span><div><small>Configuração</small><strong>Dispositivos</strong></div></a>
-  </section>
-  <section class="quick-commands">
-    <h2 class="section-title">Comandos rápidos</h2>
-    <div class="command-grid">
-      <button
-        class="command-chip"
-        *ngFor="let command of commands"
-        (click)="runCommand(command.id, command.label)"
-      >
-        <i class="bi bi-key"></i>
-        <span>{{ command.label }}</span>
-        <small>{{ command.aliases[0] }}</small>
-      </button>
-    </div>
-  </section>
-  <h2 class="section-title">Acesso rápido</h2>
-  <div class="app-grid">
+  <header class="mb-4">
+    <p class="eyebrow">CONTROLE</p>
+    <h1>O que deseja fazer?</h1>
+  </header>
+  <div class="alert alert-info" *ngIf="message">{{ message }}</div>
+  <section class="app-grid">
     <button
       class="app-card"
-      *ngFor="let app of apps"
-      (click)="open(app.name)"
+      *ngFor="let macro of macros"
+      (click)="choose(macro)"
+      [disabled]="running"
     >
-      <span class="app-icon neutral"><i class="bi bi-grid"></i></span
-      ><strong>{{ app.name }}</strong
-      ><small>{{ app.enabled ? "Disponível" : "Indisponível" }}</small></button
-    ><button class="app-card" routerLink="/controle">
-      <span class="app-icon neutral"><i class="bi bi-controller"></i></span
-      ><strong>Controle</strong><small>Controle completo</small></button
-    ><button class="app-card" routerLink="/admin/macros">
-      <span class="app-icon neutral"
-        ><i class="bi bi-lightning-charge"></i></span
-      ><strong>Macros</strong><small>Atalhos inteligentes</small>
+      <span class="app-icon neutral"><i class="bi bi-play-fill"></i></span
+      ><strong>{{ macro.name }}</strong
+      ><small>{{ macro.description || "Executar agora" }}</small>
     </button>
+  </section>
+  <div class="panel p-4 text-center" *ngIf="!macros.length">
+    <p class="mb-3">Nenhuma macro criada.</p>
+    <a class="btn btn-accent" routerLink="/admin/macros"
+      >Criar primeira macro</a
+    >
   </div>
-  <div
-    *ngIf="message"
-    class="toast-message"
-    [class.has-error]="error"
-  >{{ message }}</div>
+  <div class="modal-layer" *ngIf="selectedMacro">
+    <form class="panel editor" (ngSubmit)="confirmInput()">
+      <h2 class="h4">{{ selectedMacro.name }}</h2>
+      <label class="form-label mt-3">{{ selectedMacro.inputLabel }}</label
+      ><input
+        class="form-control"
+        name="inputValue"
+        [(ngModel)]="inputValue"
+        autofocus
+        required
+      />
+      <div class="d-flex justify-content-end gap-2 mt-4">
+        <button
+          type="button"
+          class="btn btn-outline-secondary"
+          (click)="selectedMacro = null"
+        >
+          Cancelar</button
+        ><button class="btn btn-accent" [disabled]="!inputValue.trim()">
+          Executar
+        </button>
+      </div>
+    </form>
+  </div>
 </div>

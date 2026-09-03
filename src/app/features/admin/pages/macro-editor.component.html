@@ -1,6 +1,166 @@
 <div class="page">
-  <div class="page-head"><div><p class="eyebrow">MACROS</p><h1>Editor visual</h1><p class="lead-copy">Monte comandos sem escrever códigos ADB.</p></div><button class="btn btn-accent" (click)="create()"><i class="bi bi-plus-lg"></i> Nova macro</button></div>
+  <div class="page-head">
+    <div>
+      <p class="eyebrow">MACROS</p>
+      <h1>Editor visual</h1>
+      <p class="lead-copy">Monte comandos sem escrever códigos ADB.</p>
+    </div>
+    <button class="btn btn-accent" (click)="create()">
+      <i class="bi bi-plus-lg"></i> Nova macro
+    </button>
+  </div>
   <div class="alert alert-danger" *ngIf="error">{{ error }}</div>
-  <section class="panel p-4"><div class="text-muted-custom" *ngIf="!macros.length">Nenhuma macro cadastrada.</div><div class="d-flex justify-content-between align-items-center border-bottom py-3" *ngFor="let macro of macros"><div><strong>{{ macro.name }}</strong><small class="d-block text-muted-custom">{{ macro.steps.length }} passos · {{ macro.description }}</small></div><div><button class="btn btn-sm btn-outline-secondary" (click)="edit(macro)"><i class="bi bi-pencil"></i></button><button class="btn btn-sm btn-outline-danger ms-2" (click)="remove(macro)"><i class="bi bi-trash"></i></button></div></div></section>
-  <div class="modal-layer" *ngIf="editing"><form class="panel editor" (ngSubmit)="save()"><div class="d-flex justify-content-between"><h2 class="h4">{{ editing.isNew ? 'Criar' : 'Editar' }} macro</h2><button type="button" class="btn-close btn-close-white" (click)="editing=null"></button></div><label class="form-label mt-3">Identificador</label><input class="form-control" name="id" [(ngModel)]="editing.id" [readonly]="!editing.isNew" required><label class="form-label mt-3">Nome</label><input class="form-control" name="name" [(ngModel)]="editing.name" required><label class="form-label mt-3">Descrição</label><input class="form-control" name="description" [(ngModel)]="editing.description"><h3 class="h6 mt-4">Adicionar ação</h3><div class="d-flex flex-wrap gap-2"><button type="button" class="btn btn-sm btn-outline-info" *ngFor="let action of actions" (click)="add(action)">{{ action.label }}</button></div><h3 class="h6 mt-4">Passos</h3><div class="border rounded p-2 mb-2" *ngFor="let step of editing.steps; let i=index"><div class="d-flex align-items-center gap-2"><strong class="me-auto">{{ i+1 }}. {{ label(step) }}</strong><button type="button" class="btn btn-sm btn-outline-secondary" (click)="move(i,-1)">↑</button><button type="button" class="btn btn-sm btn-outline-secondary" (click)="move(i,1)">↓</button><button type="button" class="btn btn-sm btn-outline-danger" (click)="removeStep(i)">×</button></div><input *ngIf="step.type==='text'" class="form-control mt-2" [name]="'text'+i" [(ngModel)]="step.value" placeholder="Ex.: {{'{{nomeSerie}}'}}"><input *ngIf="step.type==='wait'" type="number" class="form-control mt-2" [name]="'wait'+i" [(ngModel)]="step.milliseconds"><input *ngIf="step.type==='openApp'" class="form-control mt-2" [name]="'app'+i" [(ngModel)]="step.packageName" placeholder="Pacote Android"></div><div class="d-flex justify-content-end gap-2 mt-4"><button type="button" class="btn btn-outline-secondary" (click)="editing=null">Cancelar</button><button class="btn btn-accent" [disabled]="!editing.steps.length">Salvar</button></div></form></div>
+  <section class="panel p-4">
+    <div class="text-muted-custom" *ngIf="!macros.length">
+      Nenhuma macro cadastrada.
+    </div>
+    <div
+      class="d-flex justify-content-between align-items-center border-bottom py-3"
+      *ngFor="let macro of macros"
+    >
+      <div>
+        <strong>{{ macro.name }}</strong
+        ><small class="d-block text-muted-custom"
+          >{{ macro.steps.length }} passos · {{ macro.description }}</small
+        >
+      </div>
+      <div>
+        <button class="btn btn-sm btn-outline-secondary" (click)="edit(macro)">
+          <i class="bi bi-pencil"></i></button
+        ><button
+          class="btn btn-sm btn-outline-danger ms-2"
+          (click)="remove(macro)"
+        >
+          <i class="bi bi-trash"></i>
+        </button>
+      </div>
+    </div>
+  </section>
+  <div class="modal-layer" *ngIf="editing">
+    <form class="panel editor" (ngSubmit)="save()">
+      <div class="d-flex justify-content-between">
+        <h2 class="h4">{{ editing.isNew ? "Criar" : "Editar" }} macro</h2>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          (click)="editing = null"
+        ></button>
+      </div>
+      <label class="form-label mt-3">Identificador</label
+      ><input
+        class="form-control"
+        name="id"
+        [(ngModel)]="editing.id"
+        [readonly]="!editing.isNew"
+        required
+      /><label class="form-label mt-3">Nome</label
+      ><input
+        class="form-control"
+        name="name"
+        [(ngModel)]="editing.name"
+        required
+      /><label class="form-label mt-3">Descrição</label
+      ><input
+        class="form-control"
+        name="description"
+        [(ngModel)]="editing.description"
+      />
+      <div class="form-check form-switch mt-3">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          name="requiresInput"
+          [(ngModel)]="editing.requiresInput"
+        /><label class="form-check-label"
+          >Pedir um texto antes de executar</label
+        >
+      </div>
+      <ng-container *ngIf="editing.requiresInput"
+        ><label class="form-label mt-3">Pergunta exibida</label
+        ><input
+          class="form-control"
+          name="inputLabel"
+          [(ngModel)]="editing.inputLabel"
+          required
+        /><label class="form-label mt-3">Nome da variável</label
+        ><input
+          class="form-control"
+          name="inputVariable"
+          [(ngModel)]="editing.inputVariable"
+          required
+        /><small class="text-muted-custom"
+          >Use nos passos de texto como:
+          {{'{{'+editing.inputVariable+'}}'}}</small
+        ></ng-container
+      >
+      <h3 class="h6 mt-4">Adicionar ação</h3>
+      <div class="d-flex flex-wrap gap-2">
+        <button
+          type="button"
+          class="btn btn-sm btn-outline-info"
+          *ngFor="let action of actions"
+          (click)="add(action)"
+        >
+          {{ action.label }}
+        </button>
+      </div>
+      <h3 class="h6 mt-4">Passos</h3>
+      <div
+        class="border rounded p-2 mb-2"
+        *ngFor="let step of editing.steps; let i = index"
+      >
+        <div class="d-flex align-items-center gap-2">
+          <strong class="me-auto">{{ i + 1 }}. {{ label(step) }}</strong
+          ><button
+            type="button"
+            class="btn btn-sm btn-outline-secondary"
+            (click)="move(i, -1)"
+          >
+            ↑</button
+          ><button
+            type="button"
+            class="btn btn-sm btn-outline-secondary"
+            (click)="move(i, 1)"
+          >
+            ↓</button
+          ><button
+            type="button"
+            class="btn btn-sm btn-outline-danger"
+            (click)="removeStep(i)"
+          >
+            ×
+          </button>
+        </div>
+        <input
+          *ngIf="step.type === 'text'"
+          class="form-control mt-2"
+          [name]="'text' + i"
+          [(ngModel)]="step.value"
+        /><input
+          *ngIf="step.type === 'wait'"
+          type="number"
+          class="form-control mt-2"
+          [name]="'wait' + i"
+          [(ngModel)]="step.milliseconds"
+        /><input
+          *ngIf="step.type === 'openApp'"
+          class="form-control mt-2"
+          [name]="'app' + i"
+          [(ngModel)]="step.packageName"
+          placeholder="Pacote Android"
+        />
+      </div>
+      <div class="d-flex justify-content-end gap-2 mt-4">
+        <button
+          type="button"
+          class="btn btn-outline-secondary"
+          (click)="editing = null"
+        >
+          Cancelar</button
+        ><button class="btn btn-accent" [disabled]="!editing.steps.length">
+          Salvar
+        </button>
+      </div>
+    </form>
+  </div>
 </div>
