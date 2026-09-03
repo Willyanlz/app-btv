@@ -8,7 +8,7 @@
     <button
       class="btn btn-accent"
       *ngIf="kind === 'diagnostics'"
-      (click)="message = 'Reconexão solicitada'"
+      (click)="diagnose()"
     >
       <i class="bi bi-arrow-repeat"></i> Reconectar
     </button>
@@ -39,6 +39,7 @@
       </table>
     </div>
     <div *ngSwitchCase="'diagnostics'" class="diagnostic-grid">
+      <p *ngIf="!checks.length">Clique em diagnosticar para consultar o primeiro dispositivo ativo.</p>
       <div *ngFor="let x of checks">
         <small>{{ x.label }}</small
         ><strong [class.ok]="x.ok">{{ x.value }}</strong>
