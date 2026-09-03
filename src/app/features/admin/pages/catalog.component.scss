@@ -15,6 +15,17 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
+  position: relative;
+}
+.editor::-webkit-scrollbar {
+  width: 8px;
+}
+.editor::-webkit-scrollbar-track {
+  background: transparent;
+}
+.editor::-webkit-scrollbar-thumb {
+  background: #2b3c55;
+  border-radius: 8px;
 }
 .app-avatar {
   display: grid;
@@ -228,8 +239,9 @@
 
 @media (max-width: 576px) {
   .modal-layer {
-    place-items: center;
+    place-items: start center;
     padding: 0.5rem;
+    overflow-y: auto;
   }
 
   .editor {
