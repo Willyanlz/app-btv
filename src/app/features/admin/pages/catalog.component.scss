@@ -6,8 +6,25 @@
   display: grid;
   place-items: center;
   padding: 1rem;
+  overflow: hidden;
 }
 .editor {
   width: min(560px, 100%);
+  max-height: calc(100dvh - 2rem);
   padding: 1.5rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+@media (max-width: 576px) {
+  .modal-layer {
+    place-items: start center;
+    padding: 0.5rem;
+  }
+
+  .editor {
+    max-height: calc(100dvh - 1rem);
+    padding: 1rem;
+  }
 }
