@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { interval, Subject } from 'rxjs';
+import { interval, Subject, timer } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 import { ApiService } from '../../core/services/api.service';
 import { DeviceService } from '../../core/services/device.service';
@@ -72,7 +72,7 @@ export class RemoteComponent implements OnInit, OnDestroy {
         next: () => {
           this.busy = false;
           this.connection = 'device';
-          this.refreshScreen();
+          this.refreshAfterCommand();
         },
         error: (error) => {
           this.busy = false;
@@ -93,7 +93,7 @@ export class RemoteComponent implements OnInit, OnDestroy {
         this.busy = false;
         this.text = '';
         this.toasts.success('Texto enviado');
-        this.refreshScreen();
+        this.refreshAfterCommand();
       },
       error: (error) => {
         this.busy = false;
@@ -137,5 +137,11 @@ export class RemoteComponent implements OnInit, OnDestroy {
       URL.revokeObjectURL(this.screenshotUrl);
       this.screenshotUrl = '';
     }
+  }
+
+  private refreshAfterCommand() {
+    timer(450)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.refreshScreen());
   }
 }

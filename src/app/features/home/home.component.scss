@@ -157,8 +157,24 @@
   font-weight: 700;
   letter-spacing: 0.1em;
 }
-.modal-heading .icon-button {
+.modal-close {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
   margin-left: auto;
+  padding: 0;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  line-height: 1;
+}
+.modal-close:hover,
+.modal-close:focus-visible {
+  color: var(--ink);
+  border-color: var(--accent);
+  outline: none;
 }
 .modal-icon {
   display: grid;
@@ -179,13 +195,12 @@
     grid-template-columns: repeat(2, 1fr);
   }
   .modal-layer {
-    align-items: end;
-    padding: 0;
+    place-items: center;
+    padding: 1rem;
   }
   .editor {
-    width: 100%;
+    width: min(440px, 100%);
     padding: 1.25rem;
-    border-radius: 22px 22px 0 0;
-    padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+    border-radius: 18px;
   }
 }

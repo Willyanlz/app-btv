@@ -158,11 +158,7 @@
         >
           <option value="">Selecione o aplicativo</option>
           <option *ngFor="let app of apps" [value]="app.packageName">
-            <ng-container
-              *ngIf="app.name && app.name !== app.packageName; else pkgName"
-              >{{ app.name }}</ng-container
-            >
-            <ng-template #pkgName>{{ app.packageName }}</ng-template>
+            {{ app.name || app.packageName }}
           </option>
         </select><select
           *ngIf="step.type === 'callMacro'"
