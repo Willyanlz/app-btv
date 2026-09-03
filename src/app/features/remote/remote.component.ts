@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { interval, Subject, timer } from 'rxjs';
+import { fromEvent, interval, Subject, timer } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 import { ApiService } from '../../core/services/api.service';
 import { DeviceService } from '../../core/services/device.service';
@@ -18,7 +18,7 @@ export class RemoteComponent implements OnInit, OnDestroy {
   connection = 'não verificado';
   screenshotUrl = '';
   screenState: 'idle' | 'loading' | 'ok' | 'error' = 'idle';
-  autoRefresh = true;
+  autoRefresh = false;
   busy = false;
 
   private readonly destroy$ = new Subject<void>();
@@ -39,7 +39,25 @@ export class RemoteComponent implements OnInit, OnDestroy {
     interval(5000)
       .pipe(
         takeUntil(this.destroy$),
-        filter(() => this.autoRefresh && !!this.deviceId && !this.busy),
+        filter(
+          () =>
+            this.autoRefresh &&
+            document.visibilityState === 'visible' &&
+            !!this.deviceId &&
+            !this.busy,
+        ),
+      )
+      .subscribe(() => this.refreshScreen(true));
+    fromEvent(document, 'visibilitychange')
+      .pipe(
+        takeUntil(this.destroy$),
+        filter(
+          () =>
+            document.visibilityState === 'visible' &&
+            this.autoRefresh &&
+            !!this.deviceId &&
+            !this.busy,
+        ),
       )
       .subscribe(() => this.refreshScreen(true));
   }
@@ -106,7 +124,7 @@ export class RemoteComponent implements OnInit, OnDestroy {
   }
 
   test() {
-    if (!this.deviceId) return;
+    if (!this.deviceId || document.visibilityState === 'hidden') return;
     this.device.status(this.deviceId).subscribe((status) => {
       this.connection = status.connection;
     });
