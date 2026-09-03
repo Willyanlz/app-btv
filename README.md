@@ -54,3 +54,8 @@ Após publicar na Vercel, inclua a origem definitiva em `CORS_ORIGINS` no backen
 - Execuções, filas, diagnóstico, screenshots e configurações.
 
 Enquanto os endpoints `/api/v1` são implementados, os cadastros administrativos usam dados tipados locais. O controle aponta para a API real e mostra mensagens amigáveis quando a BTV está offline.
+# Integração
+
+O PWA usa a API de produção em `https://box.labswill.com`. Dispositivos, aplicativos, macros, intenções e automações são persistidos pelo backend; não existem dados mockados nem cadastros locais no navegador.
+
+No editor de macros, escolha ações com nomes humanos, ordene os passos e preencha somente os parâmetros necessários. O código ADB correspondente fica restrito ao backend.
