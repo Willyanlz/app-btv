@@ -111,6 +111,50 @@
   border-color: var(--danger);
   color: #ffd7da;
 }
+.modal-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgb(2 6 13 / 82%);
+  backdrop-filter: blur(6px);
+}
+.editor {
+  width: min(440px, 100%);
+  padding: 1.5rem;
+  border-color: #334b68;
+  box-shadow: 0 24px 80px rgb(0 0 0 / 50%);
+}
+.modal-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+.modal-heading h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+.modal-heading small {
+  color: var(--accent);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+.modal-heading .icon-button {
+  margin-left: auto;
+}
+.modal-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  color: var(--accent);
+  background: #15313b;
+  border-radius: 12px;
+}
 @media (max-width: 700px) {
   .hero {
     align-items: flex-start;
@@ -118,5 +162,15 @@
   }
   .app-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+  .modal-layer {
+    align-items: end;
+    padding: 0;
+  }
+  .editor {
+    width: 100%;
+    padding: 1.25rem;
+    border-radius: 22px 22px 0 0;
+    padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
   }
 }

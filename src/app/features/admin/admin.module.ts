@@ -6,6 +6,7 @@ import { AdminOverviewComponent } from './pages/admin-overview.component';
 import { CatalogComponent } from './pages/catalog.component';
 import { OperationsComponent } from './pages/operations.component';
 import { MacroEditorComponent } from './pages/macro-editor.component';
+import { DeviceAppsComponent } from './pages/device-apps.component';
 const routes: Routes = [
   { path: '', component: AdminOverviewComponent },
   {
@@ -19,12 +20,7 @@ const routes: Routes = [
   },
   {
     path: 'aplicativos',
-    component: CatalogComponent,
-    data: {
-      kind: 'apps',
-      title: 'Aplicativos',
-      subtitle: 'Pacotes e adapters disponíveis na BTV.',
-    },
+    component: DeviceAppsComponent,
   },
   {
     path: 'comandos',
@@ -38,15 +34,6 @@ const routes: Routes = [
   {
     path: 'macros',
     component: MacroEditorComponent,
-  },
-  {
-    path: 'intents',
-    component: CatalogComponent,
-    data: {
-      kind: 'intents',
-      title: 'Intents',
-      subtitle: 'Associe frases naturais às macros permitidas.',
-    },
   },
   {
     path: 'execucoes',
@@ -65,6 +52,7 @@ const routes: Routes = [
     CatalogComponent,
     OperationsComponent,
     MacroEditorComponent,
+    DeviceAppsComponent,
   ],
   imports: [
     CommonModule,

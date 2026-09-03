@@ -142,13 +142,17 @@
           class="form-control mt-2"
           [name]="'wait' + i"
           [(ngModel)]="step.milliseconds"
-        /><input
+        /><select
           *ngIf="step.type === 'openApp'"
           class="form-control mt-2"
           [name]="'app' + i"
           [(ngModel)]="step.packageName"
-          placeholder="Pacote Android"
-        />
+        >
+          <option value="">Selecione o aplicativo</option>
+          <option *ngFor="let app of apps" [value]="app.packageName">
+            {{ app.packageName }}
+          </option>
+        </select>
       </div>
       <div class="d-flex justify-content-end gap-2 mt-4">
         <button

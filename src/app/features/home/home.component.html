@@ -24,13 +24,28 @@
   </div>
   <div class="modal-layer" *ngIf="selectedMacro">
     <form class="panel editor" (ngSubmit)="confirmInput()">
-      <h2 class="h4">{{ selectedMacro.name }}</h2>
-      <label class="form-label mt-3">{{ selectedMacro.inputLabel }}</label
+      <div class="modal-heading">
+        <span class="modal-icon"><i class="bi bi-search"></i></span>
+        <div>
+          <small>EXECUTAR MACRO</small>
+          <h2>{{ selectedMacro.name }}</h2>
+        </div>
+        <button
+          type="button"
+          class="icon-button"
+          (click)="selectedMacro = null"
+          aria-label="Fechar"
+        >
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <label class="form-label mt-4">{{ selectedMacro.inputLabel }}</label
       ><input
         class="form-control"
         name="inputValue"
         [(ngModel)]="inputValue"
-        autofocus
+        autocomplete="off"
+        placeholder="Digite aqui"
         required
       />
       <div class="d-flex justify-content-end gap-2 mt-4">

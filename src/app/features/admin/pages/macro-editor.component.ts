@@ -9,6 +9,7 @@ import { ApiService } from '../../../core/services/api.service';
 export class MacroEditorComponent implements OnInit {
   macros: any[] = [];
   actions: any[] = [];
+  apps: { packageName: string }[] = [];
   editing: any = null;
   error = '';
 
@@ -17,6 +18,11 @@ export class MacroEditorComponent implements OnInit {
   ngOnInit() {
     this.load();
     this.api.actions().subscribe((actions) => (this.actions = actions));
+    this.api.list<any>('devices').subscribe((devices) => {
+      const device = devices.find((item) => item.enabled);
+      if (device)
+        this.api.deviceApps(device.id).subscribe((apps) => (this.apps = apps));
+    });
   }
   load() {
     this.api.list<any>('macros').subscribe((rows) => (this.macros = rows));

@@ -2,7 +2,13 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 
-export type Resource = 'devices' | 'apps' | 'macros' | 'intents' | 'automations' | 'commands';
+export type Resource =
+  | 'devices'
+  | 'apps'
+  | 'macros'
+  | 'intents'
+  | 'automations'
+  | 'commands';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
@@ -24,10 +30,42 @@ export class ApiService {
   actions() {
     return this.http.get<any[]>(`${this.base}/actions`);
   }
-  runMacro(deviceId: string, macroId: string, variables: Record<string, string> = {}) {
-    return this.http.post(`${this.base}/devices/${deviceId}/macros/${macroId}/run`, { variables });
+  runMacro(
+    deviceId: string,
+    macroId: string,
+    variables: Record<string, string> = {},
+  ) {
+    return this.http.post(
+      `${this.base}/devices/${deviceId}/macros/${macroId}/run`,
+      { variables },
+    );
   }
   runCommand(commandId: string) {
     return this.http.post(`${this.base}/commands/${commandId}/run`, {});
+  }
+  deviceApps(deviceId: string) {
+    return this.http.get<{ packageName: string }[]>(
+      `${this.base}/devices/${deviceId}/apps`,
+    );
+  }
+  openDeviceApp(deviceId: string, packageName: string) {
+    return this.http.post(
+      `${this.base}/devices/${deviceId}/apps/${packageName}/open`,
+      {},
+    );
+  }
+  uninstallDeviceApp(deviceId: string, packageName: string) {
+    return this.http.delete(
+      `${this.base}/devices/${deviceId}/apps/${packageName}`,
+    );
+  }
+  installDeviceApp(deviceId: string, file: File) {
+    return this.http.post(
+      `${this.base}/devices/${deviceId}/apps/install`,
+      file,
+      {
+        headers: { 'Content-Type': 'application/vnd.android.package-archive' },
+      },
+    );
   }
 }

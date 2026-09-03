@@ -1,0 +1,53 @@
+<div class="page">
+  <div class="page-head">
+    <div>
+      <p class="eyebrow">APLICATIVOS</p>
+      <h1>Apps instalados</h1>
+      <p class="lead-copy">
+        Aplicativos do usuário; pacotes da Amazon ficam ocultos.
+      </p>
+    </div>
+    <label class="btn btn-accent" [class.disabled]="!deviceId || loading"
+      ><i class="bi bi-upload"></i> Instalar APK<input
+        #apkInput
+        type="file"
+        accept=".apk,application/vnd.android.package-archive"
+        hidden
+        (change)="upload(apkInput)"
+    /></label>
+  </div>
+  <label class="form-label">Dispositivo</label
+  ><select
+    class="form-select mb-3"
+    [(ngModel)]="deviceId"
+    (ngModelChange)="load()"
+  >
+    <option value="">Selecione</option>
+    <option *ngFor="let device of devices" [value]="device.id">
+      {{ device.name }}
+    </option>
+  </select>
+  <div class="alert alert-info" *ngIf="message">{{ message }}</div>
+  <div class="alert alert-danger" *ngIf="error">{{ error }}</div>
+  <section class="panel p-3">
+    <p *ngIf="loading">Carregando...</p>
+    <p *ngIf="!loading && !apps.length">
+      Nenhum aplicativo de usuário encontrado.
+    </p>
+    <div
+      class="d-flex align-items-center gap-2 border-bottom py-3"
+      *ngFor="let app of apps"
+    >
+      <i class="bi bi-grid fs-4"></i
+      ><strong class="me-auto text-break">{{ app.packageName }}</strong
+      ><button class="btn btn-sm btn-accent" (click)="open(app.packageName)">
+        Abrir</button
+      ><button
+        class="btn btn-sm btn-outline-danger"
+        (click)="uninstall(app.packageName)"
+      >
+        <i class="bi bi-trash"></i>
+      </button>
+    </div>
+  </section>
+</div>
