@@ -116,14 +116,18 @@ export class MacroEditorComponent implements OnInit {
     return this.actions.filter(
       (action) =>
         action.type !== 'screenCondition' &&
-        (action.type !== 'clickButton' || this.buttons.length),
+        (action.type !== 'clickButton' ||
+          (!!this.editing?.appPackage && this.buttons.length)) &&
+        (action.type !== 'clickFocused' || !!this.editing?.appPackage),
     );
   }
   availableActions() {
     return this.actions.filter(
       (action) =>
         (action.type !== 'screenCondition' || this.screens.length) &&
-        (action.type !== 'clickButton' || this.buttons.length),
+        (action.type !== 'clickButton' ||
+          (!!this.editing?.appPackage && this.buttons.length)) &&
+        (action.type !== 'clickFocused' || !!this.editing?.appPackage),
     );
   }
   screenLabel(screenId: string) {
