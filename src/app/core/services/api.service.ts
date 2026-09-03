@@ -16,6 +16,7 @@ export interface DeviceApp {
   hasIcon: boolean;
   icon: string;
   color: string;
+  metadataPending: boolean;
 }
 
 @Injectable({ providedIn: 'root' })

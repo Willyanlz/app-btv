@@ -16,6 +16,7 @@ export class DeviceAppsComponent implements OnInit, OnDestroy {
   loading = false;
   uninstallApp: { packageName: string; name: string } | null = null;
   typedPackage = '';
+  private refreshTimer?: ReturnType<typeof setTimeout>;
 
   constructor(
     private readonly api: ApiService,
@@ -32,6 +33,7 @@ export class DeviceAppsComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    if (this.refreshTimer) clearTimeout(this.refreshTimer);
     this.clearIconUrls();
   }
 
@@ -44,6 +46,9 @@ export class DeviceAppsComponent implements OnInit, OnDestroy {
         this.apps = apps;
         this.loading = false;
         this.loadIcons(apps);
+        if (apps.some((app) => app.metadataPending)) {
+          this.refreshTimer = setTimeout(() => this.load(), 5000);
+        }
       },
       error: (error) => {
         this.loading = false;
@@ -65,6 +70,10 @@ export class DeviceAppsComponent implements OnInit, OnDestroy {
   }
 
   private clearIconUrls() {
+    if (this.refreshTimer) {
+      clearTimeout(this.refreshTimer);
+      this.refreshTimer = undefined;
+    }
     Object.values(this.iconUrls).forEach((url) => URL.revokeObjectURL(url));
     this.iconUrls = {};
   }
