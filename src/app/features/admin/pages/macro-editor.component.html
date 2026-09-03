@@ -181,38 +181,152 @@
             </button>
           </div>
         </div>
-        <input
-          *ngIf="step.type === 'text'"
-          class="form-control mt-2"
-          [name]="'text' + i"
-          [(ngModel)]="step.value"
-        /><input
-          *ngIf="step.type === 'wait'"
-          type="number"
-          class="form-control mt-2"
-          [name]="'wait' + i"
-          [(ngModel)]="step.milliseconds"
-        /><select
-          *ngIf="step.type === 'openApp'"
-          class="form-control mt-2"
-          [name]="'app' + i"
-          [(ngModel)]="step.packageName"
-        >
-          <option value="">Selecione o aplicativo</option>
-          <option *ngFor="let app of apps" [value]="app.packageName">
-            {{ app.name || app.packageName }}
-          </option></select
-        ><select
-          *ngIf="step.type === 'callMacro'"
-          class="form-control mt-2"
-          [name]="'call' + i"
-          [(ngModel)]="step.macroId"
-        >
-          <option value="">Selecione a macro chamada</option>
-          <option *ngFor="let m of macros" [value]="m.id">
-            {{ m.name }}
-          </option>
-        </select>
+        <div *ngIf="step.type === 'screenCondition'" class="condition-editor">
+          <label class="form-label">Qual tela deseja verificar?</label>
+          <select
+            class="form-select"
+            [name]="'screen' + i"
+            [(ngModel)]="step.screenId"
+            required
+          >
+            <option value="">Selecione uma tela</option>
+            <option *ngFor="let screen of screens" [value]="screen.id">
+              {{ screen.appName }} — {{ screen.label }}
+            </option>
+          </select>
+          <div
+            class="condition-branch condition-branch-yes"
+            [class.mt-3]="true"
+          >
+            <div class="condition-branch-title">
+              <i class="bi bi-check-circle"></i>
+              Se estiver nessa tela
+            </div>
+            <div class="condition-empty" *ngIf="!step.whenTrue.length">
+              Nenhuma ação: continua para o próximo passo.
+            </div>
+            <div
+              class="condition-action"
+              *ngFor="let child of step.whenTrue; let childIndex = index"
+            >
+              <span>{{ childIndex + 1 }}. {{ label(child) }}</span>
+              <button
+                type="button"
+                class="macro-icon-button"
+                [disabled]="childIndex === 0"
+                (click)="moveBranchStep(step, 'whenTrue', childIndex, -1)"
+                aria-label="Mover ação para cima"
+              >
+                <i class="bi bi-arrow-up"></i>
+              </button>
+              <button
+                type="button"
+                class="macro-icon-button"
+                [disabled]="childIndex === step.whenTrue.length - 1"
+                (click)="moveBranchStep(step, 'whenTrue', childIndex, 1)"
+                aria-label="Mover ação para baixo"
+              >
+                <i class="bi bi-arrow-down"></i>
+              </button>
+              <button
+                type="button"
+                class="macro-icon-button macro-icon-button-danger"
+                (click)="removeBranchStep(step, 'whenTrue', childIndex)"
+                aria-label="Excluir ação"
+              >
+                <i class="bi bi-trash"></i>
+              </button>
+              <ng-container
+                *ngTemplateOutlet="
+                  stepFields;
+                  context: {
+                    $implicit: child,
+                    fieldName: 'yes' + i + '-' + childIndex,
+                  }
+                "
+              ></ng-container>
+            </div>
+            <div class="condition-add-actions">
+              <button
+                type="button"
+                *ngFor="let action of atomicActions()"
+                (click)="addBranchStep(step, 'whenTrue', action)"
+              >
+                + {{ action.label }}
+              </button>
+            </div>
+          </div>
+          <div class="condition-branch condition-branch-no">
+            <div class="condition-branch-title">
+              <i class="bi bi-x-circle"></i>
+              Se não estiver nessa tela
+            </div>
+            <div class="condition-empty" *ngIf="!step.whenFalse.length">
+              Nenhuma ação: continua para o próximo passo.
+            </div>
+            <div
+              class="condition-action"
+              *ngFor="let child of step.whenFalse; let childIndex = index"
+            >
+              <span>{{ childIndex + 1 }}. {{ label(child) }}</span>
+              <button
+                type="button"
+                class="macro-icon-button"
+                [disabled]="childIndex === 0"
+                (click)="moveBranchStep(step, 'whenFalse', childIndex, -1)"
+                aria-label="Mover ação para cima"
+              >
+                <i class="bi bi-arrow-up"></i>
+              </button>
+              <button
+                type="button"
+                class="macro-icon-button"
+                [disabled]="childIndex === step.whenFalse.length - 1"
+                (click)="moveBranchStep(step, 'whenFalse', childIndex, 1)"
+                aria-label="Mover ação para baixo"
+              >
+                <i class="bi bi-arrow-down"></i>
+              </button>
+              <button
+                type="button"
+                class="macro-icon-button macro-icon-button-danger"
+                (click)="removeBranchStep(step, 'whenFalse', childIndex)"
+                aria-label="Excluir ação"
+              >
+                <i class="bi bi-trash"></i>
+              </button>
+              <ng-container
+                *ngTemplateOutlet="
+                  stepFields;
+                  context: {
+                    $implicit: child,
+                    fieldName: 'no' + i + '-' + childIndex,
+                  }
+                "
+              ></ng-container>
+            </div>
+            <div class="condition-add-actions">
+              <button
+                type="button"
+                *ngFor="let action of atomicActions()"
+                (click)="addBranchStep(step, 'whenFalse', action)"
+              >
+                + {{ action.label }}
+              </button>
+            </div>
+          </div>
+          <p class="condition-continue">
+            Depois, a macro continua normalmente no próximo passo.
+          </p>
+        </div>
+        <ng-container *ngIf="step.type !== 'screenCondition'">
+          <ng-container
+            *ngTemplateOutlet="
+              stepFields;
+              context: { $implicit: step, fieldName: 'main' + i }
+            "
+          ></ng-container>
+        </ng-container>
         <div class="macro-test-actions">
           <button
             type="button"
@@ -259,3 +373,41 @@
     </form>
   </div>
 </div>
+
+<ng-template #stepFields let-step let-fieldName="fieldName">
+  <input
+    *ngIf="step.type === 'text'"
+    class="form-control mt-2"
+    [name]="'text-' + fieldName"
+    [(ngModel)]="step.value"
+  />
+  <input
+    *ngIf="step.type === 'wait'"
+    type="number"
+    class="form-control mt-2"
+    [name]="'wait-' + fieldName"
+    [(ngModel)]="step.milliseconds"
+  />
+  <select
+    *ngIf="step.type === 'openApp'"
+    class="form-select mt-2"
+    [name]="'app-' + fieldName"
+    [(ngModel)]="step.packageName"
+  >
+    <option value="">Selecione o aplicativo</option>
+    <option *ngFor="let app of apps" [value]="app.packageName">
+      {{ app.name || app.packageName }}
+    </option>
+  </select>
+  <select
+    *ngIf="step.type === 'callMacro'"
+    class="form-select mt-2"
+    [name]="'call-' + fieldName"
+    [(ngModel)]="step.macroId"
+  >
+    <option value="">Selecione a macro chamada</option>
+    <option *ngFor="let macro of macros" [value]="macro.id">
+      {{ macro.name }}
+    </option>
+  </select>
+</ng-template>

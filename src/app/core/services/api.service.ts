@@ -34,6 +34,11 @@ export class ApiService {
   actions() {
     return this.http.get<any[]>(`${this.base}/actions`);
   }
+  screens() {
+    return this.http.get<{ id: string; label: string; appName: string }[]>(
+      `${this.base}/screens`,
+    );
+  }
   runMacro(
     deviceId: string,
     macroId: string,

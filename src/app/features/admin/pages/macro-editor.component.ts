@@ -12,6 +12,7 @@ import { SelectedDeviceService } from '../../../core/services/selected-device.se
 export class MacroEditorComponent implements OnInit {
   macros: any[] = [];
   actions: any[] = [];
+  screens: { id: string; label: string; appName: string }[] = [];
   apps: { packageName: string; name: string }[] = [];
   editing: any = null;
   deviceId = '';
@@ -28,6 +29,7 @@ export class MacroEditorComponent implements OnInit {
   ngOnInit() {
     this.load();
     this.api.actions().subscribe((actions) => (this.actions = actions));
+    this.api.screens().subscribe((screens) => (this.screens = screens));
     this.api.list<any>('devices').subscribe((devices) => {
       const enabledDevices = devices.filter((item) => item.enabled);
       const selectedId = this.selectedDevice.resolve(enabledDevices);
@@ -66,7 +68,7 @@ export class MacroEditorComponent implements OnInit {
     this.editing = {
       ...macro,
       appOpenDelaySeconds: macro.appOpenDelaySeconds ?? 10,
-      steps: macro.steps.map((step: any) => ({ ...step })),
+      steps: this.cloneSteps(macro.steps),
       isNew: false,
     };
   }
@@ -76,13 +78,47 @@ export class MacroEditorComponent implements OnInit {
       appOpenDelaySeconds: macro.appOpenDelaySeconds ?? 10,
       id: `${macro.id}-copia`,
       name: `${macro.name} (cópia)`,
-      steps: macro.steps.map((step: any) => ({ ...step })),
+      steps: this.cloneSteps(macro.steps),
       isNew: true,
     };
   }
   add(action: any) {
-    const step =
-      action.type === 'key'
+    this.editing.steps.push(this.newStep(action));
+  }
+  addBranchStep(step: any, branch: 'whenTrue' | 'whenFalse', action: any) {
+    step[branch].push(this.newStep(action));
+  }
+  removeBranchStep(step: any, branch: 'whenTrue' | 'whenFalse', index: number) {
+    step[branch].splice(index, 1);
+  }
+  moveBranchStep(
+    step: any,
+    branch: 'whenTrue' | 'whenFalse',
+    index: number,
+    direction: number,
+  ) {
+    const target = index + direction;
+    if (target < 0 || target >= step[branch].length) return;
+    [step[branch][index], step[branch][target]] = [
+      step[branch][target],
+      step[branch][index],
+    ];
+  }
+  atomicActions() {
+    return this.actions.filter((action) => action.type !== 'screenCondition');
+  }
+  screenLabel(screenId: string) {
+    return this.screens.find((screen) => screen.id === screenId)?.label;
+  }
+  private newStep(action: any) {
+    return action.type === 'screenCondition'
+      ? {
+          type: 'screenCondition',
+          screenId: this.screens[0]?.id ?? '',
+          whenTrue: [],
+          whenFalse: [],
+        }
+      : action.type === 'key'
         ? { type: 'key', key: action.key }
         : action.type === 'wait'
           ? { type: 'wait', milliseconds: 800 }
@@ -91,7 +127,17 @@ export class MacroEditorComponent implements OnInit {
             : action.type === 'callMacro'
               ? { type: 'callMacro', macroId: '' }
               : { type: 'openApp', packageName: '' };
-    this.editing.steps.push(step);
+  }
+  private cloneSteps(steps: any[]) {
+    return steps.map((step) => ({
+      ...step,
+      ...(step.type === 'screenCondition'
+        ? {
+            whenTrue: step.whenTrue.map((item: any) => ({ ...item })),
+            whenFalse: step.whenFalse.map((item: any) => ({ ...item })),
+          }
+        : {}),
+    }));
   }
   removeStep(index: number) {
     this.editing.steps.splice(index, 1);
@@ -105,6 +151,9 @@ export class MacroEditorComponent implements OnInit {
     ];
   }
   label(step: any) {
+    if (step.type === 'screenCondition') {
+      return `Se estiver em ${this.screenLabel(step.screenId) ?? 'uma tela'}`;
+    }
     return (
       this.actions.find(
         (item) =>

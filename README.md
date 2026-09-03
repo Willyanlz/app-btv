@@ -9,6 +9,7 @@ PWA Angular 16 + Bootstrap integrada à API `https://box.labswill.com`.
 - Em **Aplicativos**, veja nome e ícone extraídos do APK, abra/desinstale apps ou envie um `.apk`.
 - Se o APK usar um ícone adaptativo incompatível, a interface apresenta automaticamente o fallback visual.
 - Em **Macros**, adicione ações seguras e ordene os passos.
+- Use **Verificar tela** para montar caminhos “Se estiver” e “Se não estiver”; a interface mostra nomes amigáveis como **Tela de busca**.
 - Defina opcionalmente o aplicativo esperado e a espera de abertura (10 segundos por padrão); se estiver fechado, a home pede autorização para abri-lo.
 - Teste um passo isolado, todos os passos até ele ou a sequência a partir dele.
 - Clone macros parecidas e componha fluxos usando **Chamar outra macro**.
