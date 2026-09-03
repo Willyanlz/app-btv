@@ -422,7 +422,7 @@
     </option>
   </select>
   <select
-    *ngIf="step.type === 'clickButton'"
+    *ngIf="step.type === 'clickButton' || step.type === 'focusButton'"
     class="form-select mt-2"
     [name]="'button-' + fieldName"
     [(ngModel)]="step.buttonId"
