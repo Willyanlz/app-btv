@@ -6,7 +6,8 @@ PWA Angular 16 + Bootstrap integrada à API `https://box.labswill.com`.
 
 - Entre com a senha doméstica configurada na API.
 - Cadastre a box em **Dispositivos**.
-- Em **Aplicativos**, atualize a lista, abra/desinstale apps ou envie um `.apk`.
+- Em **Aplicativos**, veja nome e ícone extraídos do APK, abra/desinstale apps ou envie um `.apk`.
+- Se o APK usar um ícone adaptativo incompatível, a interface apresenta automaticamente o fallback visual.
 - Em **Macros**, adicione ações seguras e ordene os passos.
 - Teste um passo isolado, todos os passos até ele ou a sequência a partir dele.
 - Clone macros parecidas e componha fluxos usando **Chamar outra macro**.

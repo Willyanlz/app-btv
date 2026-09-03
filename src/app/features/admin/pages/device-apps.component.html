@@ -36,7 +36,16 @@
       class="d-flex align-items-center gap-3 border-bottom py-3"
       *ngFor="let app of apps"
     >
-      <span class="app-avatar" [style.background]="app.color"><i class="bi" [ngClass]="app.icon"></i></span>
+      <span class="app-avatar" [style.background]="app.color">
+        <img
+          *ngIf="iconUrls[app.packageName]; else fallbackIcon"
+          [src]="iconUrls[app.packageName]"
+          [alt]="'Ícone de ' + (app.name || app.packageName)"
+        />
+        <ng-template #fallbackIcon>
+          <i class="bi" [ngClass]="app.icon"></i>
+        </ng-template>
+      </span>
       <div class="me-auto text-break">
         <strong>
           <ng-container
@@ -70,9 +79,7 @@
       <h2 class="h5 mb-1">Desinstalar aplicativo</h2>
       <p class="text-muted-custom small mb-3">
         Esta ação remove
-        <strong
-          >{{ uninstallApp.name || uninstallApp.packageName }}</strong
-        >
+        <strong>{{ uninstallApp.name || uninstallApp.packageName }}</strong>
         da sua TV. Digite o nome do pacote abaixo para confirmar.
       </p>
       <code class="p-2">{{ uninstallApp.packageName }}</code>

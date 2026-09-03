@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { ApiService } from '../../../core/services/api.service';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ApiService, DeviceApp } from '../../../core/services/api.service';
 import { Router } from '@angular/router';
 import { ToastService } from '../../../core/services/toast.service';
 
@@ -8,9 +8,10 @@ import { ToastService } from '../../../core/services/toast.service';
   templateUrl: './device-apps.component.html',
   styleUrls: ['./catalog.component.scss'],
 })
-export class DeviceAppsComponent implements OnInit {
+export class DeviceAppsComponent implements OnInit, OnDestroy {
   devices: any[] = [];
-  apps: { packageName: string; name: string; icon: string; color: string }[] = [];
+  apps: DeviceApp[] = [];
+  iconUrls: Record<string, string> = {};
   deviceId = '';
   loading = false;
   uninstallApp: { packageName: string; name: string } | null = null;
@@ -30,13 +31,19 @@ export class DeviceAppsComponent implements OnInit {
     });
   }
 
+  ngOnDestroy() {
+    this.clearIconUrls();
+  }
+
   load() {
     if (!this.deviceId) return;
+    this.clearIconUrls();
     this.loading = true;
     this.api.deviceApps(this.deviceId).subscribe({
       next: (apps) => {
         this.apps = apps;
         this.loading = false;
+        this.loadIcons(apps);
       },
       error: (error) => {
         this.loading = false;
@@ -45,6 +52,21 @@ export class DeviceAppsComponent implements OnInit {
         );
       },
     });
+  }
+
+  private loadIcons(apps: DeviceApp[]) {
+    for (const app of apps.filter((item) => item.hasIcon)) {
+      this.api.deviceAppIcon(this.deviceId, app.packageName).subscribe({
+        next: (icon) => {
+          this.iconUrls[app.packageName] = URL.createObjectURL(icon);
+        },
+      });
+    }
+  }
+
+  private clearIconUrls() {
+    Object.values(this.iconUrls).forEach((url) => URL.revokeObjectURL(url));
+    this.iconUrls = {};
   }
 
   open(packageName: string) {
@@ -58,7 +80,9 @@ export class DeviceAppsComponent implements OnInit {
   }
 
   addToMacro(packageName: string) {
-    this.router.navigate(['/admin/macros'], { queryParams: { app: packageName } });
+    this.router.navigate(['/admin/macros'], {
+      queryParams: { app: packageName },
+    });
   }
 
   askUninstall(app: { packageName: string; name: string }) {

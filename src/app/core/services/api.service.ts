@@ -10,6 +10,14 @@ export type Resource =
   | 'automations'
   | 'commands';
 
+export interface DeviceApp {
+  packageName: string;
+  name: string;
+  hasIcon: boolean;
+  icon: string;
+  color: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private readonly base = `${environment.apiUrl}/api/v1`;
@@ -50,17 +58,22 @@ export class ApiService {
     to: number,
     variables: Record<string, string> = {},
   ) {
-    return this.http.post(`${this.base}/devices/${deviceId}/macros/${macroId}/test`, {
-      from,
-      to,
-      variables,
-    });
+    return this.http.post(
+      `${this.base}/devices/${deviceId}/macros/${macroId}/test`,
+      {
+        from,
+        to,
+        variables,
+      },
+    );
   }
   deviceApps(deviceId: string) {
-    return this.http.get<
-      { packageName: string; name: string; icon: string; color: string }[]
-    >(
-      `${this.base}/devices/${deviceId}/apps`,
+    return this.http.get<DeviceApp[]>(`${this.base}/devices/${deviceId}/apps`);
+  }
+  deviceAppIcon(deviceId: string, packageName: string) {
+    return this.http.get(
+      `${this.base}/devices/${deviceId}/apps/${packageName}/icon`,
+      { responseType: 'blob' },
     );
   }
   openDeviceApp(deviceId: string, packageName: string) {
