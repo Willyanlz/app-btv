@@ -1,28 +1,14 @@
-# Universal Remote BTV — Frontend
+# Universal Remote BTV — Angular e Android
 
-PWA Angular 16 + Bootstrap integrada à API `https://box.labswill.com`.
+Interface Angular 16 + Bootstrap disponível em dois modos:
 
-## Uso
+- PWA publicada na Vercel, integrada à API `https://box.labswill.com`;
+- aplicativo Android autônomo para celulares e tablets.
 
-- Entre com a senha doméstica configurada na API.
-- Cadastre a box em **Dispositivos**.
-- Em **Aplicativos**, veja nome e ícone extraídos do APK, abra/desinstale apps ou envie um `.apk`.
-- Se o APK usar um ícone adaptativo incompatível, a interface apresenta automaticamente o fallback visual.
-- Em **Macros**, adicione ações seguras e ordene os passos.
-- Use **Verificar tela** para montar caminhos “Se estiver” e “Se não estiver”; a interface mostra nomes amigáveis como **Tela de busca**.
-- Defina opcionalmente o aplicativo esperado e a espera de abertura (10 segundos por padrão); se estiver fechado, a home pede autorização para abri-lo.
-- Teste um passo isolado, todos os passos até ele ou a sequência a partir dele.
-- Clone macros parecidas e componha fluxos usando **Chamar outra macro**.
-- As macros ativas aparecem automaticamente na home e são executadas ao tocar.
-- Quando uma macro exige entrada, a home abre uma modal e envia o texto como variável.
-- Em **Controle**, acompanhe a tela da TV por screenshot automático; a imagem também é atualizada após cada comando.
-- Screenshots começam desligados. Quando ativados, o controle aguarda a captura de cada movimento; desligados, os comandos permanecem livres.
-- O aparelho selecionado fica salvo e é reutilizado em todas as telas.
-- Em **Diagnóstico**, use **A TV não está funcionando** para verificar rede, aparelho e autorização ADB.
-- Em **Configurações**, ative ou desative o Tailscale sempre ativo com verificação pela própria TV.
-- A API impede duas macros simultâneas no mesmo dispositivo e a PWA informa execução, conclusão ou falha.
+## Versão web
 
-## Desenvolvimento
+Na web, os cadastros, banco de dados e operações ADB continuam no backend. Para
+desenvolvimento:
 
 ```bash
 npm install
@@ -30,4 +16,49 @@ npm start
 npm run build
 ```
 
-O build fica em `dist/frontend`. O `vercel.json` contém as configurações de build e rewrite SPA. Não há mocks nem persistência local de cadastros; `localStorage` guarda somente autenticação.
+O build fica em `dist/frontend` e `vercel.json` mantém o rewrite da SPA.
+
+## Aplicativo Android autônomo
+
+No APK, aparelhos, macros e registros ficam no próprio celular. Os comandos são
+enviados diretamente à TV pelo protocolo ADB, sem depender da API ou da VPS. O
+celular e a TV precisam estar na mesma rede Wi-Fi.
+
+Na primeira conexão, confirme na TV a chave ADB apresentada pelo aplicativo e
+marque a opção para sempre permitir. A senha local permanece `270815`.
+
+Recursos nativos:
+
+- conexão ADB autenticada diretamente com a TV;
+- teclas, texto com espaços, abertura de aplicativos e screenshots;
+- executor local de macros com espera, variáveis, chamada de outra macro e condição de tela;
+- armazenamento local separado da versão web;
+- resposta tátil nos controles e no resultado das macros;
+- diagnóstico e configuração de Tailscale sempre ativa por ADB.
+
+Para atualizar os arquivos nativos e gerar o APK:
+
+```powershell
+npm run android:build
+```
+
+O APK de desenvolvimento é criado em:
+
+```text
+android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+Java e Android SDK foram preparados em `.android-tools`. Essa pasta é local e
+não é enviada ao Git. O projeto nativo exige Android 7 ou mais recente.
+
+## Uso
+
+1. Ative a depuração ADB pela rede na TV ou box.
+2. Instale o APK no celular ou tablet.
+3. Entre com a senha local.
+4. Cadastre o IP local da TV e a porta ADB, normalmente `5555`.
+5. Envie um comando e confirme a autorização exibida na TV.
+6. Crie e execute macros normalmente pela home.
+
+O navegador continua usando o backend remoto; a plataforma escolhe
+automaticamente o modo local somente dentro do APK Android.

@@ -1,6 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { from, Observable, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { LocalResource, LocalStoreService } from '../native/local-store.service';
+import { NativeAdb } from '../native/native-adb.plugin';
+import { NativeRuntimeService } from '../native/native-runtime.service';
 
 export type Resource =
   'devices' | 'apps' | 'macros' | 'intents' | 'automations' | 'commands';
@@ -53,21 +57,59 @@ export interface CurrentScreen {
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private readonly base = `${environment.apiUrl}/api/v1`;
-  constructor(private readonly http: HttpClient) {}
+  constructor(
+    private readonly http: HttpClient,
+    private readonly native: NativeRuntimeService,
+    private readonly localStore: LocalStoreService,
+  ) {}
 
-  list<T>(resource: Resource) {
+  list<T>(resource: Resource): Observable<T[]> {
+    if (this.native.enabled) {
+      return from(this.localStore.list<T>(resource as LocalResource));
+    }
     return this.http.get<T[]>(`${this.base}/${resource}`);
   }
-  create<T>(resource: Resource, value: T) {
+  create<T>(resource: Resource, value: T): Observable<T> {
+    if (this.native.enabled) {
+      return from(this.localStore.save(resource as LocalResource, value as any)) as any;
+    }
     return this.http.post<T>(`${this.base}/${resource}`, value);
   }
-  update<T extends { id: string }>(resource: Resource, value: T) {
+  update<T extends { id: string }>(resource: Resource, value: T): Observable<T> {
+    if (this.native.enabled) {
+      return from(this.localStore.save(resource as LocalResource, value));
+    }
     return this.http.put<T>(`${this.base}/${resource}/${value.id}`, value);
   }
-  remove(resource: Resource, id: string) {
+  remove(resource: Resource, id: string): Observable<any> {
+    if (this.native.enabled) {
+      return from(this.localStore.remove(resource as LocalResource, id));
+    }
     return this.http.delete(`${this.base}/${resource}/${id}`);
   }
   actions() {
+    if (this.native.enabled) {
+      return of([
+        { type: 'key', key: 'HOME', label: 'Início' },
+        { type: 'key', key: 'BACK', label: 'Voltar' },
+        { type: 'key', key: 'DPAD_UP', label: 'Seta para cima' },
+        { type: 'key', key: 'DPAD_DOWN', label: 'Seta para baixo' },
+        { type: 'key', key: 'DPAD_LEFT', label: 'Seta para esquerda' },
+        { type: 'key', key: 'DPAD_RIGHT', label: 'Seta para direita' },
+        { type: 'key', key: 'ENTER', label: 'Botão OK' },
+        { type: 'key', key: 'PLAY_PAUSE', label: 'Reproduzir/Pausar' },
+        { type: 'key', key: 'VOLUME_UP', label: 'Aumentar volume' },
+        { type: 'key', key: 'VOLUME_DOWN', label: 'Diminuir volume' },
+        { type: 'key', key: 'MUTE', label: 'Silenciar' },
+        { type: 'text', label: 'Digitar texto' },
+        { type: 'wait', label: 'Aguardar' },
+        { type: 'openApp', label: 'Abrir aplicativo' },
+        { type: 'callMacro', label: 'Chamar outra macro' },
+        { type: 'screenCondition', label: 'Verificar tela' },
+        { type: 'clickButton', label: 'Clicar em botão' },
+        { type: 'focusButton', label: 'Focar em botão' },
+      ]);
+    }
     return this.http.get<any[]>(`${this.base}/actions`);
   }
   screens(packageName: string) {
@@ -149,13 +191,48 @@ export class ApiService {
     macroId: string,
     variables: Record<string, string> = {},
     openRequiredApp = false,
-  ) {
+  ): Observable<any> {
+    if (this.native.enabled) {
+      return from(
+        (async () => {
+          const macro = await this.localStore.get<any>('macros', macroId);
+          if (openRequiredApp && macro?.appPackage) {
+            await this.native.shell(
+              deviceId,
+              `monkey -p ${macro.appPackage} -c android.intent.category.LAUNCHER 1`,
+            );
+            await new Promise((resolve) =>
+              setTimeout(resolve, Number(macro.appOpenDelaySeconds ?? 10) * 1000),
+            );
+          }
+          return this.native.runMacro(deviceId, macroId, variables);
+        })(),
+      );
+    }
     return this.http.post(
       `${this.base}/devices/${deviceId}/macros/${macroId}/run`,
       { variables, openRequiredApp },
     );
   }
-  preflightMacro(deviceId: string, macroId: string) {
+  preflightMacro(deviceId: string, macroId: string): Observable<any> {
+    if (this.native.enabled) {
+      return from(
+        (async () => {
+          const macro = await this.localStore.get<any>('macros', macroId);
+          if (!macro?.appPackage) return { ready: true, requiredApp: null };
+          const foreground = await this.native.foreground(deviceId);
+          return {
+            ready: foreground.packageName === macro.appPackage,
+            requiredApp: {
+              packageName: macro.appPackage,
+              name: macro.appPackage,
+              delaySeconds: Number(macro.appOpenDelaySeconds ?? 10),
+            },
+            foregroundPackage: foreground.packageName,
+          };
+        })(),
+      );
+    }
     return this.http.get<{
       ready: boolean;
       requiredApp: {
@@ -172,20 +249,42 @@ export class ApiService {
   testMacro(
     deviceId: string,
     macroId: string,
-    from: number,
+    fromIndex: number,
     to: number,
     variables: Record<string, string> = {},
-  ) {
+  ): Observable<any> {
+    if (this.native.enabled) {
+      return from(this.native.runMacro(deviceId, macroId, variables, fromIndex, to));
+    }
     return this.http.post(
       `${this.base}/devices/${deviceId}/macros/${macroId}/test`,
       {
-        from,
+        from: fromIndex,
         to,
         variables,
       },
     );
   }
-  deviceApps(deviceId: string) {
+  deviceApps(deviceId: string): Observable<DeviceApp[]> {
+    if (this.native.enabled) {
+      return from(
+        this.native.shell(deviceId, 'pm list packages -3').then(({ output }) =>
+          output
+            .split(/\r?\n/)
+            .map((line) => line.replace(/^package:/, '').trim())
+            .filter(Boolean)
+            .sort()
+            .map((packageName) => ({
+              packageName,
+              name: packageName,
+              hasIcon: false,
+              icon: 'bi-app',
+              color: '#64748b',
+              metadataPending: false,
+            })),
+        ),
+      );
+    }
     return this.http.get<DeviceApp[]>(`${this.base}/devices/${deviceId}/apps`);
   }
   deviceAppIcon(deviceId: string, packageName: string) {
@@ -194,13 +293,28 @@ export class ApiService {
       { responseType: 'blob' },
     );
   }
-  openDeviceApp(deviceId: string, packageName: string) {
+  openDeviceApp(deviceId: string, packageName: string): Observable<any> {
+    if (this.native.enabled) {
+      return from(
+        this.native.shell(
+          deviceId,
+          `monkey -p ${packageName} -c android.intent.category.LAUNCHER 1`,
+        ),
+      );
+    }
     return this.http.post(
       `${this.base}/devices/${deviceId}/apps/${packageName}/open`,
       {},
     );
   }
-  uninstallDeviceApp(deviceId: string, packageName: string) {
+  uninstallDeviceApp(deviceId: string, packageName: string): Observable<any> {
+    if (this.native.enabled) {
+      return from(
+        this.native.target(deviceId).then((target) =>
+          NativeAdb.uninstall({ ...target, packageName }),
+        ),
+      );
+    }
     return this.http.delete(
       `${this.base}/devices/${deviceId}/apps/${packageName}`,
     );

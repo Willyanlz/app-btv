@@ -8,6 +8,7 @@
 
 # Node
 /node_modules
+/.android-tools
 npm-debug.log
 yarn-error.log
 
