@@ -2,7 +2,6 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import {
   ApiService,
   DeviceApp,
-  FocusedNode,
   KnownButton,
   KnownScreen,
 } from '../../../core/services/api.service';
@@ -32,8 +31,6 @@ export class DeviceAppsComponent implements OnInit, OnDestroy {
   selectedScreen: KnownScreen | null = null;
   buttons: KnownButton[] = [];
   buttonName = '';
-  buttonFocus: FocusedNode | null = null;
-  buttonDumpLoading = false;
   private refreshTimer?: ReturnType<typeof setTimeout>;
 
   constructor(
@@ -238,31 +235,8 @@ export class DeviceAppsComponent implements OnInit, OnDestroy {
         next: (buttons) => {
           this.buttons = buttons;
           this.buttonName = '';
-          this.buttonFocus = null;
-          this.buttonDumpLoading = false;
         },
         error: () => this.toasts.error('Não foi possível carregar os botões.'),
-      });
-  }
-
-  readFocus() {
-    if (!this.screensApp || !this.selectedScreen || this.buttonDumpLoading)
-      return;
-    this.buttonDumpLoading = true;
-    this.api
-      .screenFocus(this.deviceId, this.screensApp.packageName, this.selectedScreen.id)
-      .subscribe({
-        next: ({ node }) => {
-          this.buttonDumpLoading = false;
-          this.buttonFocus = node;
-          if (!node) this.toasts.error('Nenhum elemento focado encontrado.');
-        },
-        error: (error) => {
-          this.buttonDumpLoading = false;
-          this.toasts.error(
-            error.error?.message ?? 'Não foi possível ler o foco atual.',
-          );
-        },
       });
   }
 
@@ -282,7 +256,7 @@ export class DeviceAppsComponent implements OnInit, OnDestroy {
           this.savingScreen = false;
           this.buttonName = '';
           this.loadButtons();
-          this.toasts.success('Botão capturado.');
+          this.toasts.success('Botão capturado em uma única leitura.');
         },
         error: (error) => {
           this.savingScreen = false;

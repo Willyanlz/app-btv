@@ -35,18 +35,6 @@ export interface KnownButton {
   centerY: number;
   bounds: string;
 }
-export interface FocusedNode {
-  resourceId: string;
-  text: string;
-  contentDesc: string;
-  className: string;
-  package: string;
-  bounds: string;
-  clickable: boolean;
-  focused: boolean;
-  centerX: number;
-  centerY: number;
-}
 export interface CurrentScreen {
   packageName: string | null;
   appName: string | null;
@@ -107,7 +95,6 @@ export class ApiService {
         { type: 'callMacro', label: 'Chamar outra macro' },
         { type: 'screenCondition', label: 'Verificar tela' },
         { type: 'clickButton', label: 'Clicar em botão' },
-        { type: 'focusButton', label: 'Focar em botão' },
       ]);
     }
     return this.http.get<any[]>(`${this.base}/actions`);
@@ -169,11 +156,6 @@ export class ApiService {
   }
   deleteAppButton(id: string) {
     return this.http.delete(`${this.base}/app-buttons/${id}`);
-  }
-  screenFocus(deviceId: string, packageName: string, screenId: string) {
-    return this.http.get<{ node: FocusedNode | null }>(
-      `${this.base}/devices/${deviceId}/apps/${packageName}/screens/${screenId}/focus`,
-    );
   }
   captureFocusedButton(
     deviceId: string,

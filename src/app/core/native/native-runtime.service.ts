@@ -120,7 +120,11 @@ export class NativeRuntimeService {
       if (!button) throw new Error('Botão conhecido não encontrado');
       await this.shell(deviceId, `input tap ${Number(button.centerX)} ${Number(button.centerY)}`);
     } else if (step.type === 'focusButton') {
-      throw new Error('Foco inteligente ainda precisa ser treinado neste aparelho');
+      // Compatibilidade com macros antigas: não navega com D-pad; apenas toca
+      // na posição já cadastrada para o botão.
+      const button = await this.store.get<any>('buttons', step.buttonId);
+      if (!button) throw new Error('Botão conhecido não encontrado');
+      await this.shell(deviceId, `input tap ${Number(button.centerX)} ${Number(button.centerY)}`);
     } else {
       throw new Error(`Ação não suportada: ${step.type}`);
     }

@@ -116,7 +116,7 @@ export class MacroEditorComponent implements OnInit {
     return this.actions.filter(
       (action) =>
         action.type !== 'screenCondition' &&
-        ((action.type !== 'clickButton' && action.type !== 'focusButton') ||
+        (action.type !== 'clickButton' ||
           (!!this.editing?.appPackage && this.buttons.length)),
     );
   }
@@ -124,7 +124,7 @@ export class MacroEditorComponent implements OnInit {
     return this.actions.filter(
       (action) =>
         (action.type !== 'screenCondition' || this.screens.length) &&
-        ((action.type !== 'clickButton' && action.type !== 'focusButton') ||
+        (action.type !== 'clickButton' ||
           (!!this.editing?.appPackage && this.buttons.length)),
     );
   }
@@ -200,8 +200,6 @@ export class MacroEditorComponent implements OnInit {
     if (action.type === 'callMacro') return { type: 'callMacro', macroId: '' };
     if (action.type === 'clickButton')
       return { type: 'clickButton', buttonId: this.firstButtonId() };
-    if (action.type === 'focusButton')
-      return { type: 'focusButton', buttonId: this.firstButtonId() };
     if (action.type === 'openApp') return { type: 'openApp', packageName: '' };
     return { type: 'openApp', packageName: '' };
   }
@@ -212,16 +210,24 @@ export class MacroEditorComponent implements OnInit {
     return '';
   }
   private cloneSteps(steps: any[]) {
-    return steps.map((step) => ({
+    return steps.map((step) => this.cloneStep(step));
+  }
+  private cloneStep(step: any): any {
+    return {
       ...step,
+      type: step.type === 'focusButton' ? 'clickButton' : step.type,
       ...(step.type === 'screenCondition'
         ? {
             operator: step.operator ?? 'is',
-            whenTrue: step.whenTrue.map((item: any) => ({ ...item })),
-            whenFalse: step.whenFalse.map((item: any) => ({ ...item })),
+            whenTrue: (step.whenTrue ?? []).map((item: any) =>
+              this.cloneStep(item),
+            ),
+            whenFalse: (step.whenFalse ?? []).map((item: any) =>
+              this.cloneStep(item),
+            ),
           }
         : {}),
-    }));
+    };
   }
   removeStep(index: number) {
     this.editing.steps.splice(index, 1);
@@ -241,9 +247,6 @@ export class MacroEditorComponent implements OnInit {
     }
     if (step.type === 'clickButton') {
       return `Clique em ${this.buttonLabel(step.buttonId) ?? 'um botão'}`;
-    }
-    if (step.type === 'focusButton') {
-      return `Focar em ${this.buttonLabel(step.buttonId) ?? 'um botão'}`;
     }
     if (step.type === 'clickFocused') {
       return 'Clicar no foco';
