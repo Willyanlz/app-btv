@@ -153,23 +153,43 @@
         </form>
       </div>
     </section>
-    <section class="panel screen-panel" [class.streaming]="mirrorEnabled">
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <strong>TV ao vivo</strong>
-        <div class="d-flex gap-2 align-items-center">
-          <label class="mirror-toggle">
-            <input
-              type="checkbox"
-              [ngModel]="mirrorEnabled"
-              (ngModelChange)="toggleMirror($event)"
-              name="mirrorEnabled"
-              [disabled]="!deviceId || mirrorLoading"
-            />
-            <span>{{ mirrorLoading ? "Conectando..." : "Espelhamento" }}</span>
-          </label>
+    <section
+      class="panel screen-panel"
+      [class.streaming]="displayPip()"
+      [ngStyle]="pipStyle"
+    >
+      <div
+        class="pip-drag-handle"
+        [class.visible]="displayPip()"
+        (pointerdown)="onPipDragStart($event)"
+      >
+        <div class="d-flex justify-content-between align-items-center mb-2 pip-header-row">
+          <strong>TV ao vivo</strong>
+          <div class="d-flex gap-2 align-items-center">
+            <button
+              type="button"
+              class="pip-fullscreen-btn"
+              [disabled]="!mirrorUrl"
+              (click)="openFullscreen()"
+              aria-label="Abrir em tela cheia"
+              title="Tela cheia"
+            >
+              <i class="bi bi-arrows-fullscreen"></i>
+            </button>
+            <label class="mirror-toggle">
+              <input
+                type="checkbox"
+                [ngModel]="mirrorEnabled"
+                (ngModelChange)="toggleMirror($event)"
+                name="mirrorEnabled"
+                [disabled]="!deviceId || mirrorLoading"
+              />
+              <span>{{ mirrorLoading ? "Conectando..." : "Espelhamento" }}</span>
+            </label>
+          </div>
         </div>
       </div>
-      <div class="screen live-screen">
+      <div #liveScreen class="screen live-screen">
         <iframe
           *ngIf="mirrorUrl"
           [src]="mirrorUrl"
@@ -180,7 +200,24 @@
           <i class="bi bi-display"></i>
           <span>Inicie o espelhamento para ver e tocar na tela.</span>
         </ng-container>
+        <button
+          *ngIf="isFullscreen"
+          type="button"
+          class="pip-exit-fullscreen"
+          (click)="closeFullscreen()"
+          aria-label="Sair da tela cheia"
+          title="Sair da tela cheia"
+        >
+          <i class="bi bi-fullscreen-exit"></i>
+        </button>
       </div>
+      <span
+        class="pip-resize-handle"
+        [class.visible]="displayPip()"
+        (pointerdown)="onPipResizeStart($event)"
+        title="Redimensionar"
+        aria-label="Redimensionar"
+      ></span>
     </section>
   </div>
 </div>
