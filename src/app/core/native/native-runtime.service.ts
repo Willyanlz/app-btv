@@ -51,11 +51,6 @@ export class NativeRuntimeService {
     return NativeAdb.shell({ ...(await this.target(deviceId)), command });
   }
 
-  async screenshot(deviceId: string) {
-    const image = await NativeAdb.screenshot(await this.target(deviceId));
-    return `data:${image.mimeType};base64,${image.data}`;
-  }
-
   async runMacro(
     deviceId: string,
     macroId: string,

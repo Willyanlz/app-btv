@@ -1,8 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { from, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { switchMap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { MIRROR_TOKEN_KEY } from './auth.service';
 import {
   DeviceStatus,
   DiagnosticResult,
@@ -35,13 +36,26 @@ export class DeviceService {
     if (this.native.enabled) return from(this.native.text(deviceId, text));
     return this.http.post(`${this.base}/devices/${deviceId}/text`, { text });
   }
-  screenshot(deviceId: string): Observable<string> {
-    if (this.native.enabled) return from(this.native.screenshot(deviceId));
-    return this.http
-      .get(`${this.base}/devices/${deviceId}/screenshot`, {
-        responseType: 'blob',
-      })
-      .pipe(map((blob) => URL.createObjectURL(blob)));
+  mirrorTicket(deviceId: string): Observable<{ url: string }> {
+    if (!this.native.enabled) {
+      return this.http.post<{ url: string }>(
+        `${this.base}/devices/${deviceId}/mirror-ticket`,
+        {},
+      );
+    }
+    const token = localStorage.getItem(MIRROR_TOKEN_KEY);
+    if (!token) {
+      throw new Error('Entre novamente no aplicativo conectado à internet para ativar o espelhamento.');
+    }
+    return from(this.native.target(deviceId)).pipe(
+      switchMap((target) =>
+        this.http.post<{ url: string }>(
+          `${this.base}/mirror-ticket`,
+          target,
+          { headers: { Authorization: `Bearer ${token}` } },
+        ),
+      ),
+    );
   }
   diagnose(deviceId: string): Observable<DiagnosticResult> {
     if (this.native.enabled) {

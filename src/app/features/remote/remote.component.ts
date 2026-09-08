@@ -1,6 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { fromEvent, interval, Subject, timer } from 'rxjs';
-import { filter, takeUntil } from 'rxjs/operators';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ApiService, CurrentScreen, FocusedNode } from '../../core/services/api.service';
 import { DeviceService } from '../../core/services/device.service';
 import { ToastService } from '../../core/services/toast.service';
@@ -17,11 +16,9 @@ export class RemoteComponent implements OnInit, OnDestroy {
   deviceId = '';
   text = '';
   connection = 'não verificado';
-  screenshotUrl = '';
-  screenState: 'idle' | 'loading' | 'ok' | 'error' = 'idle';
-  autoRefresh = false;
-  screenshotEnabled = false;
-  busy = false;
+  mirrorUrl: SafeResourceUrl | null = null;
+  mirrorEnabled = false;
+  mirrorLoading = false;
   currentScreen: CurrentScreen | null = null;
   identifyingScreen = false;
   showScreenInfo = false;
@@ -32,13 +29,12 @@ export class RemoteComponent implements OnInit, OnDestroy {
   private lastAction = '';
   private lastActionAt = 0;
 
-  private readonly destroy$ = new Subject<void>();
-
   constructor(
     private readonly api: ApiService,
     private readonly device: DeviceService,
     private readonly toasts: ToastService,
     private readonly selectedDevice: SelectedDeviceService,
+    private readonly sanitizer: DomSanitizer,
   ) {}
 
   ngOnInit() {
@@ -47,54 +43,24 @@ export class RemoteComponent implements OnInit, OnDestroy {
       this.deviceId = this.selectedDevice.resolve(this.devices);
       this.test();
     });
-    interval(5000)
-      .pipe(
-        takeUntil(this.destroy$),
-        filter(
-          () =>
-            this.autoRefresh &&
-            this.screenshotEnabled &&
-            document.visibilityState === 'visible' &&
-            !!this.deviceId &&
-            !this.busy,
-        ),
-      )
-      .subscribe(() => this.refreshScreen(true));
-    fromEvent(document, 'visibilitychange')
-      .pipe(
-        takeUntil(this.destroy$),
-        filter(
-          () =>
-            document.visibilityState === 'visible' &&
-            this.autoRefresh &&
-            this.screenshotEnabled &&
-            !!this.deviceId &&
-            !this.busy,
-        ),
-      )
-      .subscribe(() => this.refreshScreen(true));
   }
 
   ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
-    this.revokeScreen();
+    this.stopMirror();
   }
 
   onDeviceChange() {
     this.selectedDevice.select(this.deviceId);
-    this.revokeScreen();
-    this.screenState = 'idle';
+    this.stopMirror();
     this.currentScreen = null;
     this.showScreenInfo = false;
     this.focusNode = null;
     this.newButtonName = '';
     this.test();
-    if (this.screenshotEnabled) this.refreshScreen();
   }
 
   press(key: RemoteKey) {
-    if (!this.deviceId || (this.screenshotEnabled && this.busy)) return;
+    if (!this.deviceId) return;
     if (this.isAccidentalRepeat(key)) return;
     const aliases: Record<string, string> = {
       UP: 'DPAD_UP',
@@ -102,42 +68,34 @@ export class RemoteComponent implements OnInit, OnDestroy {
       LEFT: 'DPAD_LEFT',
       RIGHT: 'DPAD_RIGHT',
     };
-    if (this.screenshotEnabled) this.busy = true;
     this.device
       .key(this.deviceId, (aliases[key] ?? key) as RemoteKey)
       .subscribe({
         next: () => {
           this.connection = 'device';
-          if (this.screenshotEnabled) this.refreshAfterCommand();
         },
         error: (error) => {
-          this.busy = false;
           this.toasts.error(
             error.error?.message ?? 'Não foi possível enviar o comando.',
           );
-          this.refreshScreen();
         },
       });
   }
 
   sendText() {
-    if (!this.deviceId || !this.text || (this.screenshotEnabled && this.busy)) {
+    if (!this.deviceId || !this.text) {
       return;
     }
     const value = this.text;
-    if (this.screenshotEnabled) this.busy = true;
     this.device.type(this.deviceId, value).subscribe({
       next: () => {
         this.text = '';
         this.toasts.success('Texto enviado');
-        if (this.screenshotEnabled) this.refreshAfterCommand();
       },
       error: (error) => {
-        this.busy = false;
         this.toasts.error(
           error.error?.message ?? 'Não foi possível enviar o texto.',
         );
-        this.refreshScreen();
       },
     });
   }
@@ -275,58 +233,28 @@ export class RemoteComponent implements OnInit, OnDestroy {
       });
   }
 
-  toggleScreenshot(enabled: boolean) {
-    this.screenshotEnabled = enabled;
-    if (enabled) {
-      this.refreshScreen();
-      return;
-    }
-    this.autoRefresh = false;
-    this.busy = false;
-    this.screenState = 'idle';
-    this.revokeScreen();
-  }
-
-  refreshScreen(quiet = false, completed?: () => void) {
-    if (
-      !this.screenshotEnabled ||
-      !this.deviceId ||
-      document.visibilityState === 'hidden'
-    ) {
-      completed?.();
-      return;
-    }
-    this.screenState = 'loading';
-    this.device.screenshot(this.deviceId).subscribe({
-      next: (url) => {
-        this.revokeScreen();
-        this.screenshotUrl = url;
-        this.screenState = 'ok';
-        completed?.();
+  startMirror() {
+    if (!this.deviceId || this.mirrorLoading) return;
+    this.mirrorLoading = true;
+    this.device.mirrorTicket(this.deviceId).subscribe({
+      next: ({ url }) => {
+        this.mirrorUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+        this.mirrorEnabled = true;
+        this.mirrorLoading = false;
       },
       error: (error) => {
-        this.screenState = 'error';
-        if (!quiet) {
-          this.toasts.error(
-            error.error?.message ?? 'Não foi possível capturar a tela.',
-          );
-        }
-        completed?.();
+        this.mirrorLoading = false;
+        this.toasts.error(
+          error.error?.message ?? error.message ?? 'Não foi possível iniciar o espelhamento.',
+        );
       },
     });
   }
 
-  private revokeScreen() {
-    if (this.screenshotUrl) {
-      URL.revokeObjectURL(this.screenshotUrl);
-      this.screenshotUrl = '';
-    }
-  }
-
-  private refreshAfterCommand() {
-    timer(180)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => this.refreshScreen(false, () => (this.busy = false)));
+  stopMirror() {
+    this.mirrorEnabled = false;
+    this.mirrorUrl = null;
+    this.mirrorLoading = false;
   }
 
   private isAccidentalRepeat(key: RemoteKey) {

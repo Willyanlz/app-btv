@@ -6,6 +6,7 @@ import { environment } from '../../../environments/environment';
 
 const SESSION_KEY = 'universal_remote_session';
 const TOKEN_KEY = 'universal_remote_api_token';
+export const MIRROR_TOKEN_KEY = 'universal_remote_mirror_token';
 
 export interface LocalSession {
   authenticated: boolean;
@@ -30,7 +31,13 @@ export class AuthService {
         SESSION_KEY,
         JSON.stringify({ authenticated: true, signedInAt: new Date().toISOString() }),
       );
-      return of(true);
+      return this.http
+        .post<{ token: string }>(`${environment.apiUrl}/api/v1/auth/login`, { password })
+        .pipe(
+          tap(({ token }) => localStorage.setItem(MIRROR_TOKEN_KEY, token)),
+          map(() => true),
+          catchError(() => of(true)),
+        );
     }
     return this.http
       .post<{ token: string }>(`${environment.apiUrl}/api/v1/auth/login`, { password })
@@ -74,6 +81,7 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem(SESSION_KEY);
     localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(MIRROR_TOKEN_KEY);
   }
 
   token(): string | null {

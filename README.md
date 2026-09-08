@@ -30,7 +30,9 @@ marque a opção para sempre permitir. A senha local permanece `270815`.
 Recursos nativos:
 
 - conexão ADB autenticada diretamente com a TV;
-- teclas, texto com espaços, abertura de aplicativos e screenshots;
+- teclas, texto com espaços, abertura de aplicativos e espelhamento ao vivo;
+- toque diretamente no vídeo; em celulares e no APK o player ativo fica
+  flutuante enquanto o usuário movimenta o controle;
 - executor local de macros com espera, variáveis, chamada de outra macro e condição de tela;
 - armazenamento local separado da versão web;
 - resposta tátil nos controles e no resultado das macros;

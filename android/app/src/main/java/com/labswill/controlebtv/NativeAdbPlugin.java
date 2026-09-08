@@ -80,25 +80,6 @@ public class NativeAdbPlugin extends Plugin {
     }
 
     @PluginMethod
-    public void screenshot(PluginCall call) {
-        execute(call, dadb -> {
-            File image = File.createTempFile("screen-", ".png", getContext().getCacheDir());
-            try {
-                ensureSuccess(dadb.shell("screencap -p /data/local/tmp/labswill-screen.png"));
-                dadb.pull(image, "/data/local/tmp/labswill-screen.png");
-                dadb.shell("rm -f /data/local/tmp/labswill-screen.png");
-                byte[] bytes = java.nio.file.Files.readAllBytes(image.toPath());
-                JSObject response = new JSObject();
-                response.put("data", android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP));
-                response.put("mimeType", "image/png");
-                call.resolve(response);
-            } finally {
-                image.delete();
-            }
-        });
-    }
-
-    @PluginMethod
     public void install(PluginCall call) {
         String path = required(call, "path");
         if (path == null) return;
