@@ -11,6 +11,7 @@ import { ApiService, CurrentScreen } from '../../core/services/api.service';
 import { DeviceService } from '../../core/services/device.service';
 import { ToastService } from '../../core/services/toast.service';
 import { SelectedDeviceService } from '../../core/services/selected-device.service';
+import { NativeRuntimeService } from '../../core/native/native-runtime.service';
 import { RemoteKey } from '../../core/models/device.models';
 
 @Component({
@@ -52,6 +53,7 @@ export class RemoteComponent implements OnInit, OnDestroy {
     private readonly selectedDevice: SelectedDeviceService,
     private readonly sanitizer: DomSanitizer,
     private readonly cdr: ChangeDetectorRef,
+    private readonly native: NativeRuntimeService,
   ) {}
 
   ngOnInit() {
@@ -222,6 +224,11 @@ export class RemoteComponent implements OnInit, OnDestroy {
 
   displayPip(): boolean {
     return this.compact && this.mirrorEnabled;
+  }
+
+  /** O espelhamento (scrcpy) fica desabilitado no aplicativo Android nativo. */
+  get showMirrorPanel(): boolean {
+    return !this.native.enabled;
   }
 
   get pipStyle(): Record<string, string> | null {

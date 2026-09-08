@@ -60,7 +60,7 @@
       </form>
     </ng-container>
   </section>
-  <div class="remote-layout">
+  <div class="remote-layout" [class.no-mirror]="!showMirrorPanel">
     <section class="panel p-3 remote-panel">
       <label class="form-label">Dispositivo</label>
       <select
@@ -154,6 +154,7 @@
       </div>
     </section>
     <section
+      *ngIf="showMirrorPanel"
       class="panel screen-panel"
       [class.streaming]="displayPip()"
       [ngStyle]="pipStyle"

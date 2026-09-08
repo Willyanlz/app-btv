@@ -3,6 +3,12 @@
   grid-template-columns: minmax(320px, 0.8fr) minmax(380px, 1.2fr);
   gap: 1.25rem;
 }
+/* Sem espelhamento (APK Android): apenas o controle, centralizado. */
+.remote-layout.no-mirror {
+  display: block;
+  max-width: 560px;
+  margin-inline: auto;
+}
 .remote-panel,
 .screen-panel {
   padding: clamp(1.4rem, 4vw, 2.5rem);
