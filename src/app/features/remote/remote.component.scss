@@ -39,6 +39,24 @@
 .screen-panel {
   min-width: 0;
 }
+.mirror-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+.mirror-toggle input {
+  width: 2rem;
+  height: 1.05rem;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.mirror-toggle:has(input:disabled) {
+  opacity: 0.55;
+  cursor: wait;
+}
 .screen {
   aspect-ratio: 16/9;
   background: #05080d;

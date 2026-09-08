@@ -257,6 +257,14 @@ export class RemoteComponent implements OnInit, OnDestroy {
     this.mirrorLoading = false;
   }
 
+  toggleMirror(enabled: boolean) {
+    if (enabled) {
+      this.startMirror();
+      return;
+    }
+    this.stopMirror();
+  }
+
   private isAccidentalRepeat(key: RemoteKey) {
     const now = Date.now();
     const accidental = this.lastAction === key && now - this.lastActionAt < 180;
