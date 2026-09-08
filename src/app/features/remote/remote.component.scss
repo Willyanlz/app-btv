@@ -18,23 +18,53 @@
 .connection-badge.ok {
   color: var(--accent);
 }
-.media-row {
-  display: flex;
-  justify-content: center;
-  gap: 0.6rem;
-  margin-top: 1.5rem;
+.media-controls {
+  width: min(100%, 232px);
+  margin: 1.5rem auto 0;
+  padding: 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgb(12 23 38 / 72%);
 }
-.media-row button {
-  width: 48px;
-  height: 42px;
+.media-title {
+  display: block;
+  margin-bottom: 0.55rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+}
+.volume-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+.media-controls button {
+  min-height: 42px;
   border-radius: 10px;
   border: 1px solid var(--line);
   background: #1c2a3f;
   color: var(--ink);
 }
-.media-row button:disabled {
+.media-controls button:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.media-controls button:disabled {
   opacity: 0.42;
-  cursor: wait;
+  cursor: not-allowed;
+}
+.play-pause-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  width: 100%;
+  margin-top: 0.5rem;
+  font-size: 0.82rem;
+  font-weight: 600;
 }
 .screen-panel {
   min-width: 0;

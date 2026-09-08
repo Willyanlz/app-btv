@@ -55,7 +55,7 @@ public class NativeAdbPlugin extends Plugin {
         String key = required(call, "key");
         if (key == null) return;
         execute(call, dadb -> {
-            ensureSuccess(dadb.shell("input keyevent " + safeToken(key)));
+            ensureSuccess(dadb.shell("input keyevent " + keyCode(key)));
             call.resolve();
         });
     }
@@ -113,6 +113,23 @@ public class NativeAdbPlugin extends Plugin {
     private String safeToken(String value) {
         if (!value.matches("[A-Z0-9_]+")) throw new IllegalArgumentException("Comando inválido");
         return value;
+    }
+
+    private int keyCode(String value) {
+        switch (safeToken(value)) {
+            case "HOME": return 3;
+            case "BACK": return 4;
+            case "DPAD_UP": return 19;
+            case "DPAD_DOWN": return 20;
+            case "DPAD_LEFT": return 21;
+            case "DPAD_RIGHT": return 22;
+            case "VOLUME_UP": return 24;
+            case "VOLUME_DOWN": return 25;
+            case "ENTER": return 66;
+            case "PLAY_PAUSE": return 85;
+            case "MUTE": return 164;
+            default: throw new IllegalArgumentException("Comando não suportado");
+        }
     }
 
     private String required(PluginCall call, String name) {

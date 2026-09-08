@@ -97,23 +97,45 @@
         <app-remote-pad
           (pressed)="press($event)"
         ></app-remote-pad>
-        <div class="media-row">
+        <div class="media-controls">
+          <span class="media-title">Mídia e volume</span>
+          <div class="volume-row">
+            <button
+              type="button"
+              (click)="press('VOLUME_DOWN')"
+              [disabled]="!deviceId"
+              aria-label="Diminuir volume"
+              title="Diminuir volume"
+            >
+              <i class="bi bi-volume-down"></i>
+            </button>
+            <button
+              type="button"
+              (click)="press('MUTE')"
+              [disabled]="!deviceId"
+              aria-label="Silenciar"
+              title="Silenciar"
+            >
+              <i class="bi bi-volume-mute"></i>
+            </button>
+            <button
+              type="button"
+              (click)="press('VOLUME_UP')"
+              [disabled]="!deviceId"
+              aria-label="Aumentar volume"
+              title="Aumentar volume"
+            >
+              <i class="bi bi-volume-up"></i>
+            </button>
+          </div>
           <button
-            (click)="press('VOLUME_DOWN')"
-          >
-            <i class="bi bi-volume-down"></i></button
-          ><button
-            (click)="press('MUTE')"
-          >
-            <i class="bi bi-volume-mute"></i></button
-          ><button
+            class="play-pause-button"
+            type="button"
             (click)="press('PLAY_PAUSE')"
+            [disabled]="!deviceId"
           >
-            <i class="bi bi-play-fill"></i></button
-          ><button
-            (click)="press('VOLUME_UP')"
-          >
-            <i class="bi bi-volume-up"></i>
+            <i class="bi bi-play-fill"></i>
+            <span>Reproduzir / Pausar</span>
           </button>
         </div>
         <form (ngSubmit)="sendText()" class="input-group mt-3">

@@ -1,28 +1,25 @@
-<div class="remote mx-auto">
-  <button class="btn key up" [disabled]="disabled" (click)="send('UP')">
-    <i class="bi bi-chevron-up"></i></button
-  ><button class="btn key left" [disabled]="disabled" (click)="send('LEFT')">
-    <i class="bi bi-chevron-left"></i></button
-  ><button class="btn key enter" [disabled]="disabled" (click)="send('ENTER')">
-    OK</button
-  ><button class="btn key right" [disabled]="disabled" (click)="send('RIGHT')">
-    <i class="bi bi-chevron-right"></i></button
-  ><button class="btn key down" [disabled]="disabled" (click)="send('DOWN')">
+<div class="remote mx-auto" aria-label="Controle direcional">
+  <button class="btn key up" type="button" [disabled]="disabled" (click)="send('UP')" aria-label="Seta para cima">
+    <i class="bi bi-chevron-up"></i>
+  </button>
+  <button class="btn key left" type="button" [disabled]="disabled" (click)="send('LEFT')" aria-label="Seta para esquerda">
+    <i class="bi bi-chevron-left"></i>
+  </button>
+  <button class="btn key enter" type="button" [disabled]="disabled" (click)="send('ENTER')" aria-label="Confirmar">
+    OK
+  </button>
+  <button class="btn key right" type="button" [disabled]="disabled" (click)="send('RIGHT')" aria-label="Seta para direita">
+    <i class="bi bi-chevron-right"></i>
+  </button>
+  <button class="btn key down" type="button" [disabled]="disabled" (click)="send('DOWN')" aria-label="Seta para baixo">
     <i class="bi bi-chevron-down"></i>
   </button>
 </div>
-<div class="d-flex gap-2 justify-content-center mt-3">
-  <button
-    class="btn btn-outline-light"
-    [disabled]="disabled"
-    (click)="send('BACK')"
-  >
-    <i class="bi bi-arrow-left"></i> Voltar</button
-  ><button
-    class="btn btn-outline-light"
-    [disabled]="disabled"
-    (click)="send('HOME')"
-  >
-    <i class="bi bi-house"></i> Home
+<div class="system-actions">
+  <button class="btn btn-outline-light" type="button" [disabled]="disabled" (click)="send('BACK')">
+    <i class="bi bi-arrow-left"></i><span>Voltar</span>
+  </button>
+  <button class="btn btn-outline-light" type="button" [disabled]="disabled" (click)="send('HOME')">
+    <i class="bi bi-house"></i><span>Início</span>
   </button>
 </div>
